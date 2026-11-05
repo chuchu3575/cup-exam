@@ -1,0 +1,1909 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CUP 졸업고사</title>
+<style>
+:root{
+  --navy:#24395a; --navy-d:#1d3050; --blue:#2f6db3; --blue-l:#4a86c8;
+  --panel:#eef1f6; --panel-d:#dde3ec; --line:#c9d2de; --ink:#222;
+  --side-head:#3d5878; --ok:#1c7c3c; --bad:#c0392b; --hl:#ffe94d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:"Malgun Gothic","맑은 고딕",-apple-system,sans-serif;color:var(--ink);background:#e8ebf1;overflow:hidden}
+button{font-family:inherit;cursor:pointer}
+.screen{display:none;height:100vh}
+.screen.active{display:flex}
+
+/* ---------- 시작 / 로그인 ---------- */
+#screen-intro,#screen-login{align-items:center;justify-content:center;background:#dfe4ec}
+.intro-card{width:min(680px,94vw);background:#f4f6fa;border-radius:14px;overflow:hidden;box-shadow:0 10px 40px rgba(20,35,60,.25)}
+.intro-head{background:var(--navy);color:#fff;text-align:center;padding:22px;font-size:26px;font-weight:800;letter-spacing:1px}
+.intro-body{padding:34px 40px;text-align:center}
+.intro-inner{background:#fff;border-radius:10px;padding:30px 26px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.intro-inner p{font-size:17px;line-height:1.8}
+.intro-inner .em{color:var(--blue);font-weight:700}
+.intro-strip{background:#4a5f8c;color:#fff;font-size:13px;padding:12px;border-radius:0 0 10px 10px;margin:24px -26px -30px}
+.intro-btn{display:block;width:min(340px,80%);margin:26px auto 34px;background:var(--navy);color:#fff;border:none;border-radius:30px;padding:15px;font-size:20px;font-weight:700}
+.intro-btn:hover{background:var(--navy-d)}
+.login-card{width:min(760px,96vw);background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 10px 40px rgba(20,35,60,.25)}
+.login-head{background:#3d5878;color:#fff;text-align:center;padding:16px;font-size:24px;font-weight:800}
+.login-body{padding:26px 34px}
+table.login-tb{width:100%;border-collapse:collapse}
+table.login-tb th,table.login-tb td{border:1px solid var(--line);padding:11px 14px;font-size:15px;text-align:left}
+table.login-tb th{color:var(--blue);width:150px;background:#f5f8fc;font-weight:700}
+table.login-tb input,table.login-tb select{width:100%;border:1px solid var(--line);border-radius:4px;padding:9px 10px;font-size:15px}
+.login-notes{margin:16px 2px;font-size:12.5px;line-height:1.75;color:#333}
+.login-notes .red{color:#d02b2b;font-weight:700}
+.login-btn{display:block;width:min(420px,86%);margin:8px auto 6px;background:#aebbd2;color:#fff;border:none;border-radius:28px;padding:13px;font-size:20px;font-weight:700;transition:.15s}
+.login-btn.ready{background:var(--navy)}
+.seat-circle{width:96px;height:96px;border-radius:50%;background:#39c3d4;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto;font-weight:800}
+.seat-circle small{font-size:12px}.seat-circle span{font-size:34px;line-height:1}
+
+/* ---------- 시험 화면 ---------- */
+#screen-exam{flex-direction:column}
+.topbar{background:var(--navy);color:#fff;display:flex;align-items:center;gap:14px;padding:6px 14px;flex:0 0 62px}
+.topbar .seat{width:44px;height:44px;border-radius:50%;background:#39c3d4;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px}
+.topbar .who{font-size:12.5px;line-height:1.5;white-space:nowrap}
+.topbar .who b{font-size:13px}
+.topbar .title{flex:1;text-align:center;font-size:20px;font-weight:800;letter-spacing:.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top-group{display:flex;align-items:center;gap:5px}
+.top-label{font-size:11.5px;line-height:1.25;text-align:center;opacity:.9;margin-right:2px}
+.fontbtn{width:40px;height:40px;background:#fff;color:#111;border:2px solid transparent;border-radius:4px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0}
+.fontbtn small{font-size:9px;color:#666;font-weight:400}
+.fontbtn[data-fs="0.8"]{font-size:12px}.fontbtn[data-fs="1"]{font-size:15px}.fontbtn[data-fs="1.25"]{font-size:18px}
+.fontbtn.on{border-color:#ffd34d;background:#dce9f9}
+.laybtn{width:42px;height:40px;border-radius:4px;border:2px solid transparent;background:#3f5c86;display:flex;align-items:center;justify-content:center;gap:3px;padding:5px}
+.laybtn i{display:block;background:#8fc1f0;border-radius:2px;height:100%;flex:1}
+.laybtn.on{border-color:#ffd34d;background:#5e83b8}
+.lay-caption{font-size:10px;text-align:center;margin-top:2px;opacity:.85}
+.timerbox{background:var(--navy-d);border-radius:20px;padding:7px 16px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;white-space:nowrap}
+.timerbox .clock{width:20px;height:20px;border-radius:50%;background:#f5b731;display:inline-flex;align-items:center;justify-content:center;color:#5b3c00;font-size:12px}
+.timerbox.warn{background:#7d1f1f}
+.exam-main{flex:1;display:flex;min-height:0}
+.qarea-wrap{flex:1;display:flex;min-width:0;background:#fff}
+.qpanel{flex:1;min-width:0;overflow-y:auto;padding:22px 30px 90px;position:relative}
+.qpanel+.qpanel{border-left:1px solid #9fb0c5}
+.qhead{display:flex;align-items:flex-start;gap:12px;margin-bottom:6px}
+.qhead h2{font-size:1.5em;font-weight:800;flex:1}
+.subj-tag{font-size:.82em;color:var(--blue);font-weight:700;margin-bottom:4px}
+.tool-btn{border:1px solid var(--line);background:#f2f4f8;border-radius:5px;padding:5px 9px;font-size:12px;color:#333;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:56px}
+.tool-btn:hover{background:#e6ebf3}
+.tool-btn.on{background:#cff09a;border-color:#8fbb3f}
+.tool-btn .ic{font-size:13px}
+.guide-line{font-size:.95em;color:#333;margin:6px 0 14px}
+.qbody{font-size:1.06em;line-height:1.75}
+.qno-stem{display:flex;gap:8px}
+.qno-stem .no{font-weight:700;flex:0 0 auto}
+.qno-stem .stem{flex:1;font-weight:600}
+.hl-btns{display:flex;flex-direction:column;gap:4px;margin-left:10px}
+.hl-btn{border:1px solid var(--line);background:#f2f4f8;border-radius:4px;font-size:10.5px;padding:4px 6px;line-height:1.25;color:#444;white-space:nowrap}
+.hl-btn.on{background:#d3f36a;border-color:#94b830}
+.qbox-rich{white-space:normal}
+.qbox-rich ruby{ruby-position:under;-webkit-ruby-position:under}
+.qbox-rich rt{font-size:.72em;font-weight:600;color:#33415c;line-height:1}
+.qbox-rich u{text-decoration:underline;text-underline-offset:2px}
+.qfig{margin:14px 0 6px;text-align:center}
+.qfig img{max-width:min(420px,90%);height:auto;border:1px solid #dfe4ec;border-radius:4px;background:#fff}
+.qfig svg{border:1px solid #dfe4ec;border-radius:4px}
+.qbox{border:1.5px solid #6d7f99;border-radius:4px;background:rgba(251,252,254,.55);padding:10px 14px;margin:12px 4px 4px;white-space:pre-line}
+.opts{margin-top:16px;display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;align-items:flex-start;gap:10px}
+.opt .pick{display:flex;align-items:flex-start;gap:10px;flex:1;cursor:pointer;user-select:none}
+.opt .circ{flex:0 0 auto;width:1.45em;height:1.45em;border:1.5px solid #444;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82em;margin-top:.12em;transition:.1s}
+.opt.sel .circ{background:#111;border-color:#111;color:#111}
+.opt.sel .circ span{visibility:hidden}
+.opt .otext{flex:1}
+.opt.elim .otext{color:#aaa;text-decoration:line-through}
+.elim-btn{flex:0 0 auto;border:1px solid var(--line);background:#f4f6f9;border-radius:4px;font-size:11px;padding:3px 8px;color:#555;margin-top:2px}
+.elim-btn.on{background:#f3d1cd;border-color:#d98d84;color:#a12c1f}
+mark{background:var(--hl);padding:0 1px}
+
+/* ---------- 형광펜(자유 드로잉) ---------- */
+.qpanel{position:relative}
+.hl-canvas{position:absolute;left:0;top:0;z-index:5;pointer-events:none;mix-blend-mode:multiply}
+.qcontent{position:relative;z-index:1}
+.qpanel.hl-mode{-webkit-user-select:none;user-select:none;touch-action:pan-y;
+  cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect x="3" y="14" width="14" height="7" fill="%23ffe94d" stroke="%23b09b00"/><path d="M6 14 L14 3 L20 8 L14 14 Z" fill="%23ffd34d" stroke="%23555"/></svg>') 4 20, crosshair}
+.hl-tools{display:flex;flex-direction:column;gap:4px;margin-left:10px;flex:0 0 72px;width:72px;position:relative;z-index:6}
+
+/* 답안 표기란 */
+.sidebar{flex:0 0 250px;background:var(--panel);border-left:1px solid #9fb0c5;display:flex;flex-direction:column;min-height:0}
+.sidebar h3{background:var(--side-head);color:#fff;text-align:center;padding:10px;font-size:16px;letter-spacing:1px}
+.omr{flex:1;overflow-y:auto;padding:8px 6px 30px}
+.omr-row{display:flex;align-items:center;gap:5px;padding:3.5px 4px;border-radius:4px}
+.omr-row.cur{background:#d8e4f4}
+.omr-row .chk{width:14px;height:14px;border:1px solid #9aa8bb;background:#fff;border-radius:2px;flex:0 0 auto;font-size:10px;line-height:12px;text-align:center;color:#1c7c3c;font-weight:900;cursor:pointer;padding:0}
+.omr-row .chk:hover{background:#e3ecf7;border-color:#6c7d94}
+.omr-row .chk.on{background:#eaf6ee;border-color:#1c7c3c}
+.omr-row .qn{width:26px;font-size:12.5px;font-weight:700;color:#41546e;text-align:right;cursor:pointer}
+.omr-row .qn:hover{text-decoration:underline}
+.omr-bubbles{display:flex;gap:4px;margin-left:4px}
+.bub{width:19px;height:19px;border-radius:50%;border:1.3px solid #6c7d94;background:#fff;font-size:10.5px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#333}
+.bub:hover{background:#e3ecf7}
+.bub.fill{background:#16233a;border-color:#16233a;color:#16233a}
+
+/* 하단 바 */
+.bottombar{flex:0 0 58px;background:#d5dbe6;border-top:1px solid #aab6c6;display:flex;align-items:center;gap:8px;padding:0 12px}
+.bb-btn{border:1px solid #a9b4c4;background:#fff;border-radius:6px;padding:9px 14px;font-size:14.5px;font-weight:700;color:#243247;display:flex;align-items:center;gap:6px}
+.bb-btn:hover{background:#eef2f8}
+.bb-center{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;font-size:15px;font-weight:700}
+.nav-btn{border:1px solid #a9b4c4;background:#fff;border-radius:6px;padding:8px 16px;font-size:15px;font-weight:700}
+.nav-btn:disabled{opacity:.35;cursor:default}
+.finish-btn{background:var(--navy);color:#fff;border:none;border-radius:6px;padding:11px 18px;font-size:15px;font-weight:800;display:flex;align-items:center;gap:6px}
+.finish-btn:hover{background:var(--navy-d)}
+
+/* 모달 공통 */
+.modal-back{display:none;position:fixed;inset:0;background:rgba(10,20,40,.45);z-index:50;align-items:center;justify-content:center}
+.modal-back.open{display:flex}
+.modal{background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 14px 50px rgba(0,0,0,.4);display:flex;flex-direction:column;max-height:92vh}
+.modal-head{background:#155a8a;color:#fff;padding:12px 18px;font-size:19px;font-weight:800;text-align:center;position:relative;flex:0 0 auto}
+.modal-head .x{position:absolute;right:10px;top:8px;background:transparent;border:none;color:#fff;font-size:22px;padding:4px 8px}
+
+/* 문제보기 */
+#viewerModal .modal{width:min(1500px,96vw);height:92vh}
+.viewer-notes{padding:10px 18px 0;font-size:12.5px;font-weight:700}
+.viewer-tabs{display:flex;gap:6px;padding:10px 18px 0;border-bottom:2px solid #155a8a}
+.vtab{flex:1;border:1px solid #b9c4d2;border-bottom:none;background:#f2f5f9;padding:10px;font-size:15px;font-weight:700;border-radius:6px 6px 0 0;color:#333}
+.vtab.on{background:#155a8a;color:#fff;border-color:#155a8a}
+.viewer-grid{flex:1;overflow-y:auto;background:#e9edf3;padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;align-content:start}
+.vcard{background:#fff;border:1px solid #cfd7e2;border-radius:4px;padding:10px 12px;font-size:13px;line-height:1.6;cursor:pointer;position:relative}
+.vcard:hover{outline:2px solid var(--blue-l)}
+.vcard .vno{position:absolute;left:-1px;top:-1px;background:var(--blue);color:#fff;font-weight:800;font-size:14px;padding:3px 9px;border-radius:0 0 6px 0}
+.vcard .vq{margin:4px 0 8px 30px;font-weight:600;min-height:1.3em}
+.vcard .vopt{display:flex;gap:6px;margin:2.5px 0}
+.vcard .vopt .c{flex:0 0 auto}
+.vcard .vopt.on .c{color:#fff;background:#111;border-radius:50%;width:16px;height:16px;font-size:9px;display:inline-flex;align-items:center;justify-content:center}
+.vempty{grid-column:1/-1;text-align:center;color:#667;padding:60px 0;font-size:15px}
+
+/* 계산기 */
+#calcBox{display:none;position:fixed;left:24px;bottom:80px;width:280px;background:#fff;border:1px solid #9fb0c5;border-radius:8px;box-shadow:0 10px 34px rgba(0,0,0,.3);z-index:60;overflow:hidden}
+#calcBox .calc-head{background:#e9eef5;padding:9px 12px;font-weight:800;font-size:15px;display:flex;justify-content:space-between;cursor:move;user-select:none}
+#calcBox .calc-head button{border:none;background:transparent;font-size:17px}
+#calcDisp{width:100%;border:1px solid var(--line);text-align:right;font-size:24px;padding:8px 12px;margin:10px 0}
+.calc-body{padding:0 12px 12px}
+.calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.calc-grid button{padding:12px 0;font-size:16px;border:1px solid #c4cedb;background:#f2f5f9;border-radius:5px}
+.calc-grid button:hover{background:#e2e9f2}
+.calc-grid .eq{background:#9fc3e8}
+
+/* 그림판 */
+#paintModal .modal{width:min(1100px,94vw)}
+#paintCanvas{background:#fff;display:block;width:100%;touch-action:none}
+.paint-tools{background:#dfe5ee;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pt-btn{width:44px;height:40px;border:1px solid #a9b4c4;border-radius:6px;background:#fff;font-size:18px}
+.pt-btn.on{outline:2.5px solid #333}
+.swatch{width:32px;height:32px;border:1px solid #999;border-radius:4px;padding:0}
+.swatch.on{outline:2.5px solid #333}
+.paint-clear{margin-left:auto;background:var(--navy);color:#fff;border:none;border-radius:6px;padding:10px 16px;font-weight:700}
+
+/* 메모 */
+#memoBox{display:none;position:fixed;right:270px;top:120px;width:320px;background:#fffbe8;border:1px solid #d8c968;border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.25);z-index:60}
+#memoBox .memo-head{background:#f3e6a2;padding:8px 12px;font-weight:800;display:flex;justify-content:space-between;cursor:move;user-select:none}
+#memoBox textarea{width:100%;height:170px;border:none;background:transparent;resize:vertical;padding:10px;font-size:14px;outline:none}
+
+/* 확인 다이얼로그 */
+#confirmModal .modal{width:min(480px,92vw)}
+.confirm-body{padding:26px 26px 20px;text-align:center;font-size:16px;line-height:1.8}
+.confirm-body .warn-num{color:#c0392b;font-weight:800}
+.confirm-btns{display:flex;gap:10px;justify-content:center;padding:0 26px 24px}
+.confirm-btns button{flex:1;max-width:170px;padding:11px;border-radius:6px;font-size:15px;font-weight:700;border:1px solid #a9b4c4;background:#fff}
+.confirm-btns .primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* ---------- 결과 화면 ---------- */
+#screen-result{flex-direction:column;overflow:hidden}
+.result-top{background:var(--navy);color:#fff;padding:14px 24px;font-size:20px;font-weight:800;text-align:center}
+.result-scroll{flex:1;overflow-y:auto;padding:26px 0 60px}
+.result-inner{width:min(920px,94vw);margin:0 auto}
+.verdict-card{background:#fff;border-radius:10px;padding:26px 30px;box-shadow:0 4px 18px rgba(20,35,60,.12);text-align:center;margin-bottom:20px}
+.verdict-badge{display:inline-block;font-size:30px;font-weight:900;padding:12px 42px;border-radius:50px;margin:8px 0 12px}
+.verdict-badge.pass{background:#e2f4e7;color:var(--ok);border:2px solid var(--ok)}
+.verdict-badge.fail{background:#fceceb;color:var(--bad);border:2px solid var(--bad)}
+.verdict-badge.na{background:#eef1f6;color:#4a5a72;border:2px solid #8fa0b8}
+.verdict-sub{font-size:14.5px;color:#445;line-height:1.7}
+.score-table{width:100%;border-collapse:collapse;background:#fff;box-shadow:0 4px 18px rgba(20,35,60,.12);border-radius:10px;overflow:hidden;margin-bottom:20px}
+.score-table th,.score-table td{border:1px solid #dbe2ec;padding:11px 10px;text-align:center;font-size:15px}
+.score-table th{background:#3d5878;color:#fff;font-weight:700}
+.score-table td.subj{text-align:left;padding-left:18px;font-weight:700}
+.tag-ok{color:var(--ok);font-weight:800}
+.tag-fail{color:var(--bad);font-weight:800}
+.total-row td{background:#f2f6fb;font-weight:800;font-size:16px}
+.notice-banner{background:#fff6df;border:1.5px solid #e3c56a;color:#6b5312;border-radius:8px;padding:14px 18px;font-size:14px;line-height:1.7;margin-bottom:20px}
+.result-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:26px}
+.result-actions button{padding:12px 22px;border-radius:8px;font-size:15.5px;font-weight:700;border:1px solid #a9b4c4;background:#fff}
+.result-actions .primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.review-filter{display:flex;gap:8px;margin-bottom:14px}
+.review-filter button{padding:8px 16px;border-radius:20px;border:1px solid #a9b4c4;background:#fff;font-size:14px;font-weight:700}
+.review-filter button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.rcard{background:#fff;border-radius:8px;border:1px solid #d8dfe9;padding:16px 20px;margin-bottom:12px;line-height:1.7}
+.rcard.wrong{border-left:6px solid var(--bad)}
+.rcard.right{border-left:6px solid var(--ok)}
+.rcard.nokey{border-left:6px solid #b9a54a}
+.rcard .rq{font-weight:700;margin-bottom:6px}
+.rcard .rsub{font-size:12px;color:var(--blue);font-weight:700}
+.ropt{display:flex;gap:8px;font-size:14.5px;margin:3px 0;padding:2px 6px;border-radius:4px}
+.ropt.ans{background:#e7f2ff;outline:1.5px solid #6ea3dd;font-weight:700}
+.ropt.mine.bad{background:#fdecea;outline:1.5px solid #e19790}
+.rmeta{margin-top:8px;font-size:13.5px;color:#445}
+.rmeta b.no-ans{color:#8a6d00}
+
+/* ---------- 성적 기록 / 오답노트 화면 ---------- */
+#screen-records{flex-direction:column;background:#e8ebf1}
+.rec-top{background:var(--navy);color:#fff;padding:13px 22px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:12px}
+.rec-top .sp{flex:1}
+.rec-top button{background:#fff;color:var(--navy);border:none;border-radius:6px;padding:8px 14px;font-size:14px;font-weight:700}
+.rec-scroll{flex:1;overflow-y:auto;padding:20px 0 60px}
+.rec-inner{width:min(1020px,95vw);margin:0 auto}
+.rec-card{background:#fff;border-radius:10px;padding:18px 22px;box-shadow:0 4px 18px rgba(20,35,60,.12);margin-bottom:16px}
+.rec-card h4{font-size:16.5px;color:#24395a;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #dde4ee;display:flex;align-items:center;gap:8px}
+.rec-card h4 small{font-weight:400;font-size:12px;color:#7a8595}
+.kpi{display:flex;gap:10px;flex-wrap:wrap}
+.kpi>div{flex:1;min-width:120px;background:#f4f7fb;border:1px solid #dde5ef;border-radius:8px;padding:12px 10px;text-align:center}
+.kpi b{display:block;font-size:23px;color:#24395a;line-height:1.3}
+.kpi small{color:#5a6a80;font-size:12px}
+.bar-row{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:14px}
+.bar-row .lb{width:112px;font-weight:700;flex:0 0 auto}
+.bar-track{flex:1;height:17px;background:#eaeef4;border-radius:9px;overflow:hidden}
+.bar-fill{height:100%;border-radius:9px;transition:width .3s}
+.bar-row .vl{width:126px;text-align:right;font-size:12.5px;flex:0 0 auto;color:#445}
+.grade{font-size:11px;font-weight:800;padding:2px 7px;border-radius:10px;margin-left:6px;white-space:nowrap}
+.g-bad{background:#fdecea;color:#c0392b}
+.g-mid{background:#fff4dc;color:#8a6100}
+.g-ok{background:#e6f5ec;color:#1c7c3c}
+.rec-tb{width:100%;border-collapse:collapse;font-size:13.5px}
+.rec-tb th,.rec-tb td{border:1px solid #e2e8f0;padding:8px 9px;text-align:center}
+.rec-tb th{background:#eef2f8;color:#2c3f5c}
+.rec-tb td.l{text-align:left}
+.rec-btn{border:1px solid #a9b4c4;background:#fff;border-radius:5px;padding:5px 8px;font-size:12px;font-weight:700;color:#2c3f5c}
+.rec-btn:hover{background:#eef2f8}
+.rec-btn.del{color:#c0392b;border-color:#e2b3ad}
+.rec-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.rec-actions button{padding:10px 15px;border-radius:8px;font-weight:700;font-size:14px;border:1px solid #a9b4c4;background:#fff}
+.rec-actions .primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.rec-actions .danger{color:#c0392b;border-color:#e0a8a2}
+.rec-filter{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:10px;padding:12px 16px;box-shadow:0 4px 18px rgba(20,35,60,.10)}
+select.rec-sel{padding:8px 10px;border:1px solid var(--line);border-radius:6px;font-size:14px;font-family:inherit}
+.wrong-item{border:1px solid #e6e9ef;border-left:5px solid var(--bad);border-radius:6px;padding:10px 13px;margin:8px 0;font-size:13.5px;line-height:1.7;background:#fdfdfe}
+.wrong-item .wq{font-weight:700;color:#233}
+.wrong-item .wmeta{font-size:12.5px;color:#556}
+.freq-badge{display:inline-block;background:var(--bad);color:#fff;border-radius:10px;font-size:11.5px;font-weight:800;padding:2px 8px;margin-right:6px}
+.rec-empty{text-align:center;color:#66748a;padding:34px 0;font-size:14.5px;line-height:1.8}
+.mini{font-size:12px;color:#66748a}
+.store-warn{background:#fceceb;border:1.5px solid #e0a8a2;color:#8c2b20;border-radius:8px;padding:12px 16px;font-size:13.5px;line-height:1.7;margin-bottom:16px}
+.detail-box{background:#f7f9fc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;margin-top:10px}
+
+/* ---------- 교사용 대시보드 ---------- */
+#screen-teacher{flex-direction:column;background:#e8ebf1}
+.t-live{font-size:13.5px;font-weight:700;color:#24395a}
+.t-tabs{display:flex;gap:8px;margin-bottom:14px}
+.t-tabs button{padding:9px 18px;border-radius:20px;border:1px solid #a9b4c4;background:#fff;font-size:14.5px;font-weight:700}
+.t-tabs button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.t-ok{color:var(--ok);font-weight:800}
+.t-bad{color:var(--bad);font-weight:800;font-size:12px}
+.t-ing{color:#8a6100}
+.t-keygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:6px}
+.t-keygrid div{border:1px solid #dde5ef;border-radius:6px;padding:5px 4px;text-align:center;font-size:14px;background:#f7f9fc}
+.t-keygrid span{display:block;font-size:11px;color:#66748a}
+#tpwModal .modal{width:min(420px,92vw)}
+.tpw-body{padding:24px 26px 10px;text-align:center;font-size:15px;line-height:1.7}
+.tpw-body input{width:100%;margin-top:12px;border:1px solid var(--line);border-radius:6px;padding:11px 12px;font-size:16px}
+.tpw-msg{min-height:22px;color:#c0392b;font-weight:700;font-size:13.5px;margin-top:8px}
+
+@media (max-width:1000px){ .sidebar{flex-basis:200px} .topbar .title{font-size:15px} }
+</style>
+</head>
+<body>
+
+<!-- ===================== 시작 화면 ===================== -->
+<div class="screen active" id="screen-intro">
+  <div class="intro-card">
+    <div class="intro-head" id="introTitle">CUP 졸업고사</div>
+    <div class="intro-body">
+      <div class="intro-inner">
+        <p>본 시험은 언어재활사 국가시험과 같은 <span class="em">CBT 방식</span>으로 치르는<br>
+        <span class="em">CUP 졸업고사</span>입니다.</p>
+        <p style="margin-top:14px;font-size:14.5px;color:#556">문항 풀이, 체크문제, 형광펜(자유 필기), 계산기, 그림판,<br>답안 표기란을 실제 국가시험 CBT와 같은 방식으로 사용합니다.</p>
+        <p style="margin-top:10px;font-size:13.5px;color:#2f6db3;font-weight:700">시험을 종료하면 답안이 자동으로 제출됩니다. 점수와 정답은 교수자가 확인합니다.</p>
+        <div class="intro-strip">아래의 시작 버튼을 클릭하면 응시자 로그인 화면으로 이동합니다.</div>
+      </div>
+      <button class="intro-btn" onclick="go('login')">졸업고사 시작</button>
+      <button class="intro-btn" style="background:#4a5f8c;margin:-16px auto 30px;font-size:16px;padding:12px" onclick="openTeacherLogin()">🔒 교사용 대시보드</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 로그인 화면 ===================== -->
+<div class="screen" id="screen-login">
+  <div class="login-card">
+    <div class="login-head">응시자 로그인</div>
+    <div class="login-body">
+      <table class="login-tb">
+        <tr><th>시험명</th><td id="loginExamName"></td></tr>
+        <tr><th>교시</th><td>
+          <select id="selSession">
+            <option value="1">1교시</option>
+            <option value="2">2교시</option>
+          </select>
+        </td></tr>
+        <tr><th>학번</th><td><input id="inpNum" placeholder="학번을 입력해 주세요. (숫자만)" maxlength="20" inputmode="numeric" autocomplete="off"></td></tr>
+        <tr><th>성명</th><td><input id="inpName" placeholder="성명을 입력해 주세요." maxlength="20" autocomplete="off"></td></tr>
+        <tr><th style="vertical-align:middle"><div class="seat-circle"><small>좌석번호</small><span>01</span></div></th>
+            <td style="vertical-align:middle">
+              <div class="login-notes" style="margin:0">
+                ※ 학번과 성명을 입력하고 로그인해 주세요.<br>
+                ※ 학번은 답안 제출 기록을 구분하는 데 사용되니 정확히 입력하세요.<br>
+                ※ 교시를 선택하면 해당 교시 문항이 시작됩니다.<br>
+                <span id="sessionInfoLine"></span><br>
+                <span class="red">※ 시험 시작 후 새로고침을 하면 응시 내용이 사라지니 주의하세요.</span><br>
+                <span class="red">※ 로그인과 답안 제출에는 인터넷 연결이 필요합니다.</span>
+              </div>
+            </td></tr>
+      </table>
+      <div style="height:16px"></div>
+      <button class="login-btn" id="btnLogin" onclick="startExam()">로그인</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 시험 화면 ===================== -->
+<div class="screen" id="screen-exam">
+  <div class="topbar">
+    <div class="seat">01</div>
+    <div class="who">학번: <b id="hdNum"></b><br>성명: <b id="hdName"></b></div>
+    <div class="title" id="hdTitle"></div>
+    <div class="top-group">
+      <div class="top-label">글자<br>크기</div>
+      <div><button class="fontbtn" data-fs="0.8" onclick="setFont(0.8)">가<small>80%</small></button></div>
+      <div><button class="fontbtn on" data-fs="1" onclick="setFont(1)">가<small>100%</small></button></div>
+      <div><button class="fontbtn" data-fs="1.25" onclick="setFont(1.25)">가<small>125%</small></button></div>
+    </div>
+    <div class="top-group" style="margin-left:6px">
+      <div class="top-label">화면<br>배치</div>
+      <div><button class="laybtn on" id="lay1" onclick="setLayout(1)" title="1단 보기"><i></i></button><div class="lay-caption">1단 보기</div></div>
+      <div><button class="laybtn" id="lay2" onclick="setLayout(2)" title="2단 보기"><i></i><i></i></button><div class="lay-caption">2단 보기</div></div>
+    </div>
+    <div class="timerbox" id="timerBox"><span class="clock">⏱</span> 남은 시간 : <span id="timerText">00:00:00</span></div>
+  </div>
+
+  <div class="exam-main">
+    <div class="qarea-wrap" id="qWrap"></div>
+    <div class="sidebar">
+      <h3>답안 표기란</h3>
+      <div class="omr" id="omr"></div>
+    </div>
+  </div>
+
+  <div class="bottombar">
+    <button class="bb-btn" onclick="toggleCalc()">🖩 계산기</button>
+    <button class="bb-btn" onclick="openPaint()">✏ 그림판</button>
+    <div class="bb-center">
+      <button class="nav-btn" id="btnPrev" onclick="movePage(-1)">◀ 이전</button>
+      <span id="pageText">1/1</span>
+      <button class="nav-btn" id="btnNext" onclick="movePage(1)">다음 ▶</button>
+    </div>
+    <button class="bb-btn" onclick="openViewer('all')">📄 전체 문제 (<span id="cntAll">0</span>)</button>
+    <button class="bb-btn" onclick="openViewer('check')">✔ 체크 문제 (<span id="cntCheck">0</span>)</button>
+    <button class="bb-btn" onclick="openViewer('unsolved')">📋 안 푼 문제 (<span id="cntUnsolved">0</span>)</button>
+    <button class="finish-btn" onclick="askFinish()">⏻ 시험 종료</button>
+  </div>
+</div>
+
+<!-- ===================== 결과 화면 ===================== -->
+<div class="screen" id="screen-result">
+  <div class="result-top" id="resultTop"></div>
+  <div class="result-scroll"><div class="result-inner" id="resultInner"></div></div>
+</div>
+
+<!-- ===================== 성적 기록 / 오답노트 화면 ===================== -->
+<div class="screen" id="screen-records">
+  <div class="rec-top">
+    <span>📊 성적 기록 · 오답노트</span>
+    <span class="sp"></span>
+    <button onclick="closeRecords()">◀ 돌아가기</button>
+  </div>
+  <div class="rec-scroll"><div class="rec-inner" id="recInner"></div></div>
+</div>
+<!-- ===================== 교사용 대시보드 ===================== -->
+<div class="screen" id="screen-teacher">
+  <div class="rec-top">
+    <span>🔒 교사용 대시보드</span>
+    <span class="sp"></span>
+    <button onclick="teacherLock()">잠그고 나가기</button>
+  </div>
+  <div class="rec-scroll"><div class="rec-inner" id="teacherInner"></div></div>
+</div>
+<div class="modal-back" id="tpwModal">
+  <div class="modal">
+    <div class="modal-head">교사용 대시보드 <button class="x" onclick="closeModal('tpwModal')">✕</button></div>
+    <div class="tpw-body">교사 비밀번호를 입력해 주세요.<br><span class="mini">비밀번호가 맞아야 정답과 학생 결과를 볼 수 있습니다.</span>
+      <input type="password" id="tpwInput" autocomplete="off" onkeydown="if(event.key==='Enter')teacherLogin()">
+      <div class="tpw-msg" id="tpwMsg"></div>
+    </div>
+    <div class="confirm-btns">
+      <button onclick="closeModal('tpwModal')">취소</button>
+      <button class="primary" onclick="teacherLogin()">확인</button>
+    </div>
+  </div>
+</div>
+<input type="file" id="recImportFile" accept=".json,application/json" style="display:none" onchange="importRecords(this)">
+
+<!-- 문제보기 모달 -->
+<div class="modal-back" id="viewerModal">
+  <div class="modal">
+    <div class="modal-head">문제 보기 <button class="x" onclick="closeModal('viewerModal')">✕</button></div>
+    <div class="viewer-notes">※ 전체/체크/안 푼 문제 탭을 클릭하여 해당 문제를 확인할 수 있습니다.<br>※ 문제를 클릭하면 해당 문제로 이동하여 답안 수정이 가능합니다.</div>
+    <div class="viewer-tabs">
+      <button class="vtab" data-tab="all" onclick="viewerTab('all')">전체 문제 (<span id="vtAll">0</span>)</button>
+      <button class="vtab" data-tab="check" onclick="viewerTab('check')">체크 문제 (<span id="vtCheck">0</span>)</button>
+      <button class="vtab" data-tab="unsolved" onclick="viewerTab('unsolved')">안 푼 문제 (<span id="vtUnsolved">0</span>)</button>
+    </div>
+    <div class="viewer-grid" id="viewerGrid"></div>
+  </div>
+</div>
+
+<!-- 계산기 -->
+<div id="calcBox">
+  <div class="calc-head" id="calcHead">계산기 <button onclick="toggleCalc()">✕</button></div>
+  <div class="calc-body">
+    <input id="calcDisp" value="0" readonly>
+    <div class="calc-grid">
+      <button onclick="calcKey('CA')">CA</button><button onclick="calcKey('BS')">BS</button><button onclick="calcKey('%')">%</button><button onclick="calcKey('/')">/</button>
+      <button onclick="calcKey('7')">7</button><button onclick="calcKey('8')">8</button><button onclick="calcKey('9')">9</button><button onclick="calcKey('*')">*</button>
+      <button onclick="calcKey('4')">4</button><button onclick="calcKey('5')">5</button><button onclick="calcKey('6')">6</button><button onclick="calcKey('-')">-</button>
+      <button onclick="calcKey('1')">1</button><button onclick="calcKey('2')">2</button><button onclick="calcKey('3')">3</button><button onclick="calcKey('+')">+</button>
+      <button style="grid-column:span 2" onclick="calcKey('0')">0</button><button onclick="calcKey('.')">.</button><button class="eq" onclick="calcKey('=')">=</button>
+    </div>
+  </div>
+</div>
+
+<!-- 그림판 -->
+<div class="modal-back" id="paintModal">
+  <div class="modal">
+    <div class="modal-head">그림판 <button class="x" onclick="closeModal('paintModal')">✕</button></div>
+    <canvas id="paintCanvas" width="1060" height="560"></canvas>
+    <div class="paint-tools">
+      <button class="pt-btn on" id="ptPen" onclick="paintTool('pen')" title="연필">✏</button>
+      <button class="pt-btn" id="ptEraser" onclick="paintTool('eraser')" title="지우개">◽</button>
+      <span style="font-weight:700">색상</span>
+      <button class="swatch on" style="background:#222" onclick="paintColor('#222',this)"></button>
+      <button class="swatch" style="background:#e8382f" onclick="paintColor('#e8382f',this)"></button>
+      <button class="swatch" style="background:#f2920a" onclick="paintColor('#f2920a',this)"></button>
+      <button class="swatch" style="background:#3ecb52" onclick="paintColor('#3ecb52',this)"></button>
+      <button class="swatch" style="background:#1877e0" onclick="paintColor('#1877e0',this)"></button>
+      <span style="font-weight:700">굵기</span>
+      <select id="paintWidth" style="padding:7px;border-radius:5px;border:1px solid #a9b4c4">
+        <option value="2">얇게 ──</option>
+        <option value="5" selected>보통 ━━</option>
+        <option value="10">굵게 ██</option>
+      </select>
+      <button class="paint-clear" onclick="paintClear()">전체지움</button>
+    </div>
+  </div>
+</div>
+
+<!-- 메모 -->
+<div id="memoBox">
+  <div class="memo-head" id="memoHead"><span id="memoTitle">메모</span> <button style="border:none;background:transparent;font-size:16px" onclick="closeMemo()">✕</button></div>
+  <textarea id="memoText" placeholder="이 문제에 대한 메모를 적어 두세요. (본인 화면에만 보입니다)"></textarea>
+</div>
+
+<!-- 종료 확인 -->
+<div class="modal-back" id="confirmModal">
+  <div class="modal">
+    <div class="modal-head">시험 종료</div>
+    <div class="confirm-body" id="confirmBody"></div>
+    <div class="confirm-btns">
+      <button onclick="closeModal('confirmModal')">계속 풀기</button>
+      <button class="primary" onclick="submitExam()">종료 및 제출</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   ▣ 시험 데이터 (이 블록만 교체하면 새 회차 모의고사가 됩니다)
+   - answerKey: 정답을 문항 순서대로 숫자로 붙여 쓴 문자열
+     예) 80문항이면 "31524..." (80자리), 각 자리 = 해당 문항 정답 번호(1~5)
+     아직 입력 전이면 "" (빈 문자열) 로 두세요. 채점 시 안내가 표시됩니다.
+   ===================================================================== */
+const EXAM_DATA = {"examTitle": "CUP 졸업고사", "round": "", "sessions": {"1": {"name": "1교시", "minutes": 75, "subjects": [{"name": "신경언어장애", "from": 1, "to": 30}, {"name": "유창성장애", "from": 31, "to": 55}, {"name": "음성장애", "from": 56, "to": 80}], "questions": [{"no": 1, "q": "좌측 대뇌반구에서 시작된 운동신경 섬유 중 일부가 반대쪽으로 교차되는 지점은 어느 부분인가?", "box": [], "options": ["척수", "연수", "시상", "간뇌", "소뇌"]}, {"no": 2, "q": "뇌신경에 대한 설명으로 옳은 것은?", "box": [], "options": ["11쌍의 좌우 대칭 구조이다.", "7번은 안면신경으로 턱의 움직임에 관여한다.", "9번은 와우전정신경으로 청각 및 평형감각에 관여한다.", "10번은 미주신경으로 후두의 감감 및 운동에 관여한다.", "11번 뇌신경은 설인신경으로 인두의 감각에 관여한다."]}, {"no": 3, "q": "언어정보가 일차청각영역, 베르니케영역, 브로카영역, 일차운동영역의 순서로 전달되었을 때 나타나는 언어활동은?", "box": [], "options": ["묵독하기", "듣고 말하기", "듣고 이해하기", "스스로 말하기", "소리 내어 읽기"]}, {"no": 4, "q": "다음의 임상 및 신경학적 검사 내용 중 옳은 것은?", "box": [], "options": ["루리아 고리(Luria loop) 과제로 무시증을 평가할 수 있다.", "간이정신상태 검사는 시간, 장소, 사람에 대한 지남력 평가 문항을 포함하고 있다.", "글래스고우 혼수 척도(Glasgow Coma Scale)의 점수가 낮을수록 의식상태가 좋다.", "소뇌 기능을 평가하기 위해 손가락 코대기 검사, 교대운동속도 과제 등을 실시한다.", "‘손잡이’ 검사 문항 중 ‘글씨 쓰는 손’이 손잡이를 확인하는 데 가장 예측력이 높다."]}, {"no": 5, "q": "뇌손상으로 인한 신경언어장애의 원인에 대한 설명 중 알맞은 것은?", "box": [], "options": ["지주막하 출혈은 경막과 지주막 사이의 공간에서 일어나는 뇌출혈이다.", "혈관의 약한 지점이 터지면서 혈액이 밖으로 나오는 현상을 허혈(ischemia)이라고 한다.", "혈관이 좁아지거나 막히면서 혈류량이 현저히 감소되거나 전혀 없게 되는 상태를 출혈이라고 한다.", "혈관을 통해 이동하던 물질이 갑자기 동맥을 막아 뇌손상이 일어나는 것을 혈전성 뇌졸중이라고 한다.", "혈전이나 색전이 일시적으로 동맥을 막고 있다가 분해되거나 용해되는 것을 일과성 허혈발작이라고 한다."]}, {"no": 6, "q": "실어증 환자에 대한 설명으로 알맞은 것은?", "box": [], "options": ["환자의 연령이 높을수록 예후가 좋다.", "환자의 경제력은 예후와 관련성이 크지 않다.", "오른손잡이 환자가 왼손잡이보다 예후가 좋다.", "환자의 자연회복은 발병 후 1년 동안 지속된다.", "환자의 학력이나 발병 전 직업은 치료에 영향을 미치지 않는다."]}, {"no": 7, "q": "다음에 제시된 환자의 이름대기 양상을 무엇이라 하는가?", "box": [], "options": ["자곤", "신조어", "보속증", "의미착어", "음소착어"], "boxHtml": "<table style=\"border-collapse:collapse;width:100%\"><tr><th style=\"text-align:left;padding:2px 8px\">&lt;검사자&gt;</th><th style=\"text-align:left;padding:2px 8px\">&lt;환자&gt;</th></tr><tr><td style=\"padding:2px 8px\">(가방을 보여주면서) 이게 뭐죠?</td><td style=\"padding:2px 8px\">자... 자 자방</td></tr><tr><td style=\"padding:2px 8px\">(숟가락을 보여주면서) 이게 뭐죠?</td><td style=\"padding:2px 8px\">이...이거... 둗가락</td></tr></table>"}, {"no": 8, "q": "다음 실어증 환자의 의사소통 양상을 보고, 이에 해당하는 실어증 유형은?", "box": ["검사자: 그림에 대해 자세히 설명해 보세요.", "환자: 음...으...으...", "검사자: 지금 이 방에 문이 닫혀 있습니까?", "환자: 예.", "검사자: 다음을 따라해 보세요. ‘그가 내 뒤를 몰래 밟았다’", "환자: 그가 내 뒤를 몰래 밟았다.", "검사자: 이것의 이름이 무엇인가요?", "환자: 음.. 몰라."], "options": ["브로카실어증", "연결피질운동실어증", "연결피질감각실어증", "전도실어증", "전반실어증"]}, {"no": 9, "q": "다음 실어증 검사 도구 중 그 유형이 다른 하나는?", "box": [], "options": ["한국판 보스톤 이름대기 검사(K-BNT)", "포치 의사소통 능력 검사(PICA)", "보스톤 실어증 진단검사(BDAE)", "한국판 웨스턴 실어증 검사(K-WAB)", "미네소타 실어증 감별 진단검사(MTDDA)"]}, {"no": 10, "q": "실어증 평가에 대한 설명으로 옳은 것은?", "box": [], "options": ["실어증 평가의 수용언어 과제에는 읽기와 쓰기가 포함된다.", "발병 직후 초기평가의 목적은 치료의 효과를 확인하는 것이다.", "그림 설명하기 과제는 단어 수준에서의 표현언어 능력을 평가한다.", "이름대기 능력은 실생활에서 사용빈도, 친숙도의 정도 등에 영향을 받는다.", "따라말하기 과제는 기억력과 같은 인지능력을 평가하는 것이 주된 목표이다."]}, {"no": 11, "q": "실어증 환자의 구어표현력 치료에 대한 설명 중 적절한 것은?", "box": [], "options": ["구어적인 지시에 따라 행동하게 한다.", "문장을 들려주고 예-아니요로 대답하게 한다.", "그림을 보고 그림의 상황에 대해 이야기하도록 한다.", "사물의 이름을 듣고 해당하는 글자를 가리키게 한다.", "환경음을 들려주고 소리가 들리면 손을 들게 한다."]}, {"no": 12, "q": "다음의 특징을 보이는 실어증 환자에게 가장 적절한 언어치료 접근법은?", "box": ["한국판 웨스턴 실어증 검사: Aphasia Quotient(AQ)=12.9", "손잡이: 오른쪽", "주의집중력: 비교적 좋음", "사지실행증: 경증(mild)", "구어모방성: 매우 낮음", "이름대기 능력: 매우 낮음"], "options": ["자극접근법", "시각동작치료", "통제 유발 치료", "멜로디 억양 치료법", "실어증 문장산출 프로그램"]}, {"no": 13, "q": "증세가 완화되면서 실어증 유형이 변화할 수 있는 순서로 옳은 것은?", "box": [], "options": ["전반실어증-베르니케실어증-전도실어증-명칭실어증", "전반실어증-연결피질감각실어증-혼합연결피질실어증", "베르니케실어증-혼합연결피질실어증-연결피질감각실어증", "브로카실어증-연결피질운동실어증-명칭실어증-전도실어증", "혼합연결피질실어증-베르니케실어증-전도실어증-명칭실어증"]}, {"no": 14, "q": "다음 중 중추형 실독증(Central alexia)에서 관찰하기 어려운 증상은?", "box": [], "options": ["의미적 오류 (예: 백일/돌)", "시각적 오류 (예: 마비/나비)", "비단어 읽기 오류 (예: 인경/안경)", "불규칙 단어 읽기 오류 (예: 갑서치/값어치)", "좌측 시야 무시 (예: 거짓말/새빨간 거짓말)"]}, {"no": 15, "q": "다음 과제들이 공통적으로 평가하고자 하는 것은?", "box": ["▪ 선 이등분 과제", "▪ 시계 그리기 과제", "▪ 문장 베껴쓰기 과제"], "options": ["실어증", "실독증", "무시증", "마비말장애", "기억력장애"]}, {"no": 16, "q": "우뇌손상 환자의 의사소통 특성을 보여주기 어려운 과제는?", "box": [], "options": ["“청년 실업에 대해 이야기 나눠봅시다.”", "“점심 먹었어?”와 “점심 먹었어.” 이해하기", "“다음 사물 그림을 보고 이름을 말해보세요.”", "“‘비 온 뒤에 땅이 굳는다’가 무슨 뜻인지 말씀해 보세요.”", "“다음 그림을 보고 무슨 일이 일어나고 있는지 자세히 설명해 보세요.”"]}, {"no": 17, "q": "65세 환자의 말 평가 결과, 조음기관의 움직임이 느리고, 교대운동속도는 느렸지만 규칙적이었다. 최대발성시간은 11초였고, 쥐어짜는 듯한 음질을 보였다. 이 환자의 마비말장애 유형은?", "box": [], "options": ["경직형", "이완형", "실조형", "운동저하형", "운동과잉형"]}, {"no": 18, "q": "다음 중 해부학적 손상 부위와 마비말장애 유형이 맞게 짝지어진 것은?", "box": [], "options": ["하위운동신경세포 - 강직형", "상부운동신경세포 - 이완형", "하위운동신경세포 - 과대운동형", "기저핵과 연관회로 - 과소운동형", "기저핵과 연관회로 - 편측 상부 운동신경형"]}, {"no": 19, "q": "마비말장애와 말실행증의 감별진단에 가장 중요한 말운동검사는?", "box": [], "options": ["자동말 과제", "말명료도 평가 과제", "일련운동속도(SMR) 과제", "모음 /아/ 연장 발성 과제", "부하테스트 (stress testing)"]}, {"no": 20, "q": "다음의 말 특색을 보인 마비말장애 환자에게 가장 적절한 치료법은?", "box": ["발성을 시작하는 데 어려움을 보임.", "목소리의 크기가 작아서 상대방이 알아듣기 어려움.", "음성 떨림", "단조로운 음도", "비교적 빠른 말속도"], "options": ["조음점 지시법", "하품-한숨 쉬기", "지연 청각 피드백", "구개거상 보철 사용", "리실버만 음성치료"]}, {"no": 21, "q": "실조형 마비말장애의 치료접근법으로 가장 적절한 것은?", "box": [], "options": ["말속도를 느리게 한다.", "음성강도를 증진시킨다.", "긴장된 근육을 이완시킨다.", "비구어운동 과제를 실시한다.", "반복적인 조음훈련을 실시한다."]}, {"no": 22, "q": "초기 알츠하이머 치매 환자가 보이는 언어문제로 가장 적절한 것은?", "box": [], "options": ["문법의 오류", "부정확한 조음", "발화의 비유창성", "이름대기 어려움", "따라말하기의 어려움"]}, {"no": 23, "q": "다음의 특징을 보이는 치매의 유형은?", "box": ["- 조음장애", "- 삼킴장애", "- 발성부전", "- 갑작스러운 발병", "- 계단식 악화", "- 뇌졸중 위험인자 보유"], "options": ["혈관성 치매", "파킨슨병 치매", "전두측두엽치매", "알츠하이머 치매", "원발성 진행성 실어증"]}, {"no": 24, "q": "초기 알츠하이머 치매와 초기 원발성 진행성 실어증을 감별하기 위한 과제로 적절한 것은?", "box": [], "options": ["장기기억력 검사", "일화기억력 검사", "대면이름대기 검사", "생성이름대기 검사", "간단한 예-아니요 질문에 대답하기"]}, {"no": 25, "q": "치매 환자의 의사소통 능력 증진을 위해, 가족들에게 권고할 사항으로 가장 적절한 것은?", "box": ["가) 눈맞춤을 한 후에 천천히 말하도록 한다.", "나) 여러 사람과 함께 환자와의 대화에 참여한다.", "다) 명제의 수를 될 수 있는 대로 줄인다.", "라) 다양하고 복잡한 일상생활을 제공하도록 한다."], "options": ["가,나,다", "가,다", "나,라", "라", "가,나,다,라"]}, {"no": 26, "q": "말실행증의 주요 특징을 적절하게 설명한 것은?", "box": [], "options": ["‘어제 한 일 설명하기’보다 ‘숫자 세기’에서 어려움이 증가한다.", "‘호루라기’를 여러번 반복하여 시도해도 /호라루기/로 말한다.", "/퍼터커/ 반복과제보다 /퍼/, /터/, /커/ 반복과제에서 어려움이 증가한다.", "‘선생님’을 말할 때 나타날 수 있는 조음 오류의 형태는 왜곡이 가장 흔하다.", "‘이층’->‘이층집'->'이층집창' 순서로 따라말하기 할 때 점차 오류가 증가한다."]}, {"no": 27, "q": "말실행증의 일반적인 치료원칙은?", "box": [], "options": ["단기간의 집중적인 치료가 필요하다.", "구개거상 보철기와 같은 보조 기기를 이용한다.", "안정적이고 자동화된 구어표현을 위해 반복 훈련한다.", "과제의 난이도를 조정하는 것보다 양을 조절해야 한다.", "운율 치료는 발성 및 호흡 치료와 함께 이루어져야 한다."]}, {"no": 28, "q": "외상성 뇌손상 환자의 특성 중 상대적으로 부정적인 예후를 예측할 수 있는 것은?", "box": [], "options": ["낮은 연령", "짧은 혼수상태", "높은 교육수준", "짧은 외상 후 기억상실 기간", "낮은 글래스고우 혼수 척도 점수"]}, {"no": 29, "q": "삼킴장애 환자가 음식물을 삼키려고 시도하기 전에 음식물이 인두강 쪽으로 넘어가서 기도의 성대 밑까지 들어갔을 때, 이러한 현상을 일컫는 용어는?", "box": [], "options": ["삼킴 전 흡인", "삼킴 중 흡인", "삼킴 후 흡인", "삼킴 전 침습", "삼킴 후 침습"]}, {"no": 30, "q": "설골과 후두의 거상 및 전방운동이 일어나고 상부식도괄약근이 개방되는 단계에서 일어날 수 있는 삼킴문제는?", "box": [], "options": ["식도의 연동운동 약화", "식도벽에 잔여물 형성", "음식덩이 형성의 어려움", "불완전한 기도 폐쇄로 흡인 발생", "앞구개궁으로 음식덩이 이동의 어려움"]}, {"no": 31, "q": "아동 말더듬 치료에서 언어치료사가 부모상담을 통하여 찾아내는 유창성을 방해하는 요인에 해당하는 것은?", "box": [], "options": ["주위 사람들의 느린 구어속도", "아동의 말더듬을 끝까지 들어주는 태도", "아동이 더듬는 말 대신해주기", "아동의 수준에 맞은 언어 사용", "부드럽고 느린 구어 모델"]}, {"no": 32, "q": "속화의 특성으로 적절하지 않은 것은?", "box": [], "options": ["자신의 말에 불안과 공포를 느낀다.", "말이 지나치게 빠르다.", "비조직적인 문장구조를 나타낸다.", "조음의 오류가 나타난다.", "읽기, 쓰기에도 오류가 나타난다."]}, {"no": 33, "q": "아동 및 성인의 말더듬 심한 정도 평가(Stuttering Severity Instrument for Children and Adult, Riley, 1994)에 대한 설명으로 바른 것은?", "box": [], "options": ["말더듬 비율과 구어속도를 측정한다.", "성인은 읽기와 말하기 자료로 발화를 수집한다.", "부수행동은 다섯 가지 유형을 검사한다.", "발화 자료는 150음절 정도를 수집할 것을 권장하고 있다.", "폐쇄시간은 가장 길게 머물렀던 시간으로 한다."]}, {"no": 34, "q": "P-FA(파라다이스 유창성 진단검사)에서 평가하는 영역이 아닌 것은?", "box": [], "options": ["구어속도", "정상적 비유창성 비율", "부수행동", "의사소통태도", "비정상적 비유창성 비율"]}, {"no": 35, "q": "말더듬 수정 접근법의 확인 단계에서 치료사의 역할은?", "box": [], "options": ["새롭게 배운 유창성 기법을 적용하게 한다.", "직면하는 스트레스에 저항하는 능력을 증진시킨다.", "불안, 공포 등의 부정적 감정에서 벗어나게 한다.", "대상자의 비유창한 행동에 객관적인 평가를 한다.", "자신의 말더듬 행동을 찾아내고 분석하게 한다."]}, {"no": 36, "q": "경도 경계선말더듬 아동의 치료에 대한 설명 중 바른 것은?", "box": [], "options": ["가족과 환경의 변화에 초점을 둔 간접치료로 접근한다.", "직접치료를 시도하는 것은 바람직하지 않다.", "간헐강화에서 계속강화 스케줄로 진행한다.", "유창성 방해요인들에 대한 둔감화를 실시한다.", "부모에게 유창하게 한 후 치료사에게 전이시킨다."]}, {"no": 37, "q": "P-FA(파라다이스 유창성 진단검사)에 대한 설명 중 적절하지 않은 것은?", "box": [], "options": ["ND비율은 ND점수이다.", "AD점수는 AD비율에 가중치 1.5를 곱한 값이다.", "ND에 긴장이 수반되면 AD로 판단한다.", "취학전 아동에게는 의사소통태도 검사를 실시하지 않는다.", "한 단어에서 여러 가지 비유창성 유형이 나타나면 가장 심한 것을 기록한다."]}, {"no": 38, "q": "말더듬의 핵심행동 중 반복에 대한 설명으로 바른 것은?", "box": [], "options": ["언어학적 길이가 긴 단위의 반복이 많을수록 말더듬일 가능성이 높다.", "말소리, 음절, 낱말 등 반복이 나타난 수를 단위반복수라고 한다.", "각 반복에서 정상적인 발음이 나오기 전에 되풀이한 수를 반복횟수라고 한다.", "말더듬이 심해지면서 말더듬의 반복속도가 빨라진다.", "말더듬 초기에는 반복이 불규칙적으로 이루어진다."]}, {"no": 39, "q": "다음의 발화에 대한 P-FA의 AD 점수는?", "box": ["“오오늘 시험이시험이 이이있있어서 일찍일찍 일어났어요. 눈눈눈이 많이 감~~겼지만 세세수하고 와왔어요.”"], "options": ["20", "21", "27", "30", "41"]}, {"no": 40, "q": "더듬을 가능성이 있는 낱말을 다른 표현으로 바꾸어 말하는 방법에 해당하는 것은?", "box": [], "options": ["미완성 구", "구 반복", "연기책", "스프너리즘", "동의어 사용"]}, {"no": 41, "q": "바꾸어 말하기에 대한 예가 바른 것은?", "box": [], "options": ["순서 바꾸기(정류장-차 타는데)", "에두르기(버스표-차표)", "전보식 표현(집이 어디야-어디야 집이)", "대용어 사용(학교에 가자-거기에 가자)", "간투사 사용(연필요-글씨 쓸 때 쓰는 거요)"]}, {"no": 42, "q": "말을 더듬는 사람들의 심리 및 태도 평가에 대한 설명 중 바른 것은?", "box": [], "options": ["의사소통 태도 검사를 통하여 말더듬과 정상인을 감별할 수 있다.", "말을 더듬는 사람들의 심리 등을 이해하고 치료방향을 설정한다.", "학령기 아동은 언어치료사의 면담보다는 공식적인 도구가 신뢰성이 높다.", "취학전 아동이 비유창성을 인식하지 않더라도 의사소통 태도 검사를 해야 한다.", "자기효능감 검사를 통하여 자신의 말더듬을 얼마나 인식하고 있는지를 알 수 있다."]}, {"no": 43, "q": "초기 아동말더듬 치료에서 선행자극에 대한 설명 중 바른 것은?", "box": [], "options": ["대화 상대자는 언어치료사에서 부모로", "치료환경은 가정에서 치료실로", "언어적 단위는 대화에서 단단어로", "대화 주제는 친숙하지 않은 것부터", "구어모델링은 간접모델링에서 직접모델링으로"]}, {"no": 44, "q": "Guitar(1998)의 말더듬 진행단계에 대한 설명 중 바른 것은?", "box": [], "options": ["초기말더듬: 자신의 말더듬을 인식하기 시작한다.", "경계선급말더듬: 비유창성 유형 중 반복의 속도가 빨라진다.", "초기말더듬: 자신에 대한 강한 부정적인 느낌을 가지고 있다.", "중간급말더듬: 비유창성 유형 중 연장이 보이기 시작한다.", "심화된말더듬: 청자의 태도 및 반응에 둔감해진다."]}, {"no": 45, "q": "신경인성말더듬(neurogenic stuttering)과 발달성 말더듬을 감별진단하는 특성에 해당하는 것은?", "box": [], "options": ["신경인성 말더듬은 대화 주제에 따라 비유창성이 달라진다.", "신경인성 말더듬은 비유창성이 기능어에서도 나타난다.", "신경인성 말더듬은 회피행동이 나타난다.", "신경인성 말더듬은 적응효과가 나타난다.", "신경인성 말더듬은 비유창성 유형이 주로 막힘이 나타난다."]}, {"no": 46, "q": "말을 더듬는 사람이 같은 읽기 자료를 반복해서 읽을 때 개인별로 같은 자리에서 어느 정도 더듬는가를 뜻하는 것은?", "box": [], "options": ["일치율", "일관성 효과", "적응효과", "정보하중", "위치효과"]}, {"no": 47, "q": "말더듬 치료 프로그램 중 유지 단계에 대한 설명 중 적절하지 않은 것은?", "box": [], "options": ["세션의 빈도와 길이를 점차적으로 줄인다.", "규칙적으로 치료실을 방문하는 것이 좋다.", "구어에 대한 자기 모니터링이 중요하다.", "새롭게 형성된 유창성을 지속적으로 유지하는 것이 목표이다.", "안정적인 유지단계를 통해 재발을 방지할 수 있다."]}, {"no": 48, "q": "말더듬 치료에서 아동을 직접적으로 다루지 않고 부모상담을 통하여 유창성 증진을 유도하는 치료프로그램은?", "box": [], "options": ["지연청각피드백 프로그램", "GILCU 프로그램", "리드콤 프로그램", "말더듬수정법", "유창성형성법"]}, {"no": 49, "q": "말더듬 순간 멈추고 하고자 하는 말을 부드럽게 시작하였다. 사용한 기법은?", "box": [], "options": ["취소(cancellation)", "지연피드백", "예비셑", "다시말하기", "빠져나오기(pull-out)"]}, {"no": 50, "q": "말더듬인이 말더듬을 회피하는 행동에 속하는 것은?", "box": [], "options": ["연기책", "발 구르기", "눈 깜빡임", "손 흔들기", "혀 내밀기"]}, {"no": 51, "q": "말더듬 치료의 목표에서 자발 유창성에 대한 설명 중 적절하지 않은 것은?", "box": [], "options": ["자발유창성은 일반 사람들의 정상유창성을 말한다.", "청소년 이상 연령의 말더듬은 대부분 자발유창성이 목표가 된다.", "언어자체에는 신경을 쓰지 않고 오직 말의 내용만을 생각하며 말한다.", "말더듬 치료를 받아도 자발적인 유창성에 이르지 못하는 경우가 있다.", "유창하게 말하지만 가끔 정상적인 비유창성이 나타난다."]}, {"no": 52, "q": "말더듬 성인을 위한 자기효능감척도(Ornstein & Manning, 1985)에 대한 설명 중 바른 것은?", "box": [], "options": ["내면적인 검사로 말더듬에 대한 인식 정도를 측정한다.", "말하기 상황은 30개이며 쉬운 것에서 어려운 것으로 제시한다.", "말하기 상황에서 회피, 투쟁, 예기 정도를 측정한다.", "말더듬이 심할수록 수행 부분에서 높은 점수를 나타낸다.", "말하기 상황에 접근 및 유창성 수행 자신감 정도를 측정한다."]}, {"no": 53, "q": "유창성 형성법에 대한 설명으로 가정 적합한 것은?", "box": [], "options": ["치료목표는 수용말더듬 이상으로 한다.", "치료효과에 대한 객관적인 자료를 강조한다.", "부정적인 정서를 줄이기 위한 상담을 강조한다.", "감정 및 의사소통 태도의 변화를 강조한다.", "말더듬이 나타나는 순간의 변화를 목표로 한다."]}, {"no": 54, "q": "말더듬 수정 접근법이 추구하는 궁극적인 목표는?", "box": [], "options": ["부모들의 유창성 기준을 낮추기", "보다 쉽고 자연스럽게 더듬기", "말을 더듬지 않게 하기", "상담을 통한 간접적인 치료", "자발유창성을 유도하기"]}, {"no": 55, "q": "유창성 형성법의 하위 프로그램 중에서 단단어에서 유창하면 점차 문장으로 발화를 유도하는 기법은?", "box": [], "options": ["벌 프로그램", "지연청각 피드백 프로그램", "전통적인 프로그램", "GILCU 프로그램", "말더듬 수정법"]}, {"no": 56, "q": "다음 중 성대를 개방하는 근육은?", "box": [], "options": ["윤상갑상근(aryte-thyroid m.)", "갑상피열근(thyro-arytenoid m.)", "가로윤상근(transverse arytenoid m.)", "측윤상피열근(lateral crico-arytenoid m.)", "후윤상피열근(posterior crico-arytenoid m.)"]}, {"no": 57, "q": "성대의 개폐를 지배하는 신경은?", "box": [], "options": ["삼차신경", "안면신경", "설인신경", "미주신경", "설하신경"]}, {"no": 58, "q": "다음 중 음성장애 유발 원인이 다른 것은?", "box": [], "options": ["변성발성장애", "라인케 부종", "후두암", "백반증", "각화증"]}, {"no": 59, "q": "성대 구조에서 섬유성 단백질인 엘라스틴 섬유조직이 가장 느슨하여 공기로 차 있는 층은?", "box": [], "options": ["상피층", "고유층 상층", "고유층 중간층", "고유층 심층", "성대근"]}, {"no": 60, "q": "다음 중 연인두폐쇄부전 사례를의 말소리를 검사할 때 적절한 단어는?", "box": [], "options": ["나무", "가방", "포도", "엄마", "영어"]}, {"no": 61, "q": "다음 중 숨을 깊게 들이마실 수 있도록 지원하는 근육은?", "box": [], "options": ["내늑간근(internal intercostal muscle)", "외늑간근(external intercostal muscle)", "복횡근(transverse abdominal)", "내복근(internal abdominal)", "복직근(rectus abdominal)"]}, {"no": 62, "q": "다음 사례 중 정상적인 음성을 산출하다가 점차 목쉰소리와 과다비음이 증가하는 사례는 ?", "box": [], "options": ["근무력증", "구개파열", "이완성발성장애", "연축성발성장애", "근위축성 축삭경화증"]}, {"no": 63, "q": "성대 변화에 따른 말소리에 대한 설명이 옳은 것은?", "box": [], "options": ["성대 길이가 길면 음도가 높아진다.", "성대 두께가 얇아지면 음도가 낮아진다.", "성대의 긴장도가 높아지면 음도가 높아진다", "성대의 탄성이 높아질수록 음도가 낮아진다.", "성대의 무게가 무거워지면 음도가 높아진다"]}, {"no": 64, "q": "아래 근육의 기능이 다른 것은?", "box": [], "options": ["대흉근", "전거근", "횡경막근", "늑골거근", "내늑간근"]}, {"no": 65, "q": "다음 중 옳은 것은?", "box": [], "options": ["남성의 기본주파수는 200Hz이다.", "남성의 성대길이는 여성보다 짧다.", "남성의 주기길이는 여성보다 짧다.", "남성의 초당 주기 횟수는 여성보다 적다.", "남성의 기본주파수와 제 1음형대 주파수는 같다."]}, {"no": 66, "q": "‘파파파’ 발성시 성문하압을 측정할 수 있는 검사 도구는?", "box": [], "options": ["PAS", "MDVP", "Nasometer", "Real Time Pitch", "spectrogram analysis"]}, {"no": 67, "q": "다음 중 옳은 것은?", "box": [], "options": ["평순 저모음은 평순 고모음보다 제 1음형대가 높다.", "평순 저모음은 평순 고모음보다 제 2음형대가 높다.", "원순모음의 제 1 과 2 음형대가 평순모음보다 높다.", "원순모음의 제 2음형대는 모음들 중에서 가장 높다.", "모음 /이/의 제 1음형대는 모음들 중에서 가장 높다."]}, {"no": 68, "q": "가성대 발성장애를 가진 대상자의 효율적인 음성 치료방법은?", "box": [], "options": ["차폐", "LSVT", "흡기발성", "밀기접근", "노래조로 말하기"]}, {"no": 69, "q": "GRBAS의 내용으로 맞는 것은?", "box": [], "options": ["G(Grade) : 전반적 이상도, 긴장성", "R(Roughness) : 거친 소리, 애성도", "B(Breathness) : 억압된 소리, 조조성", "A(Asthenicity) : 이완성, 무력성", "S(Strained) : 기식화된 소리, 노력성"]}, {"no": 70, "q": "과소기능장애를 가진 대상자의 음도 및 강도변경을 치료할 때 사용할 수 있는 것은?", "box": [], "options": ["MDVP", "Nasometer", "Real Time Pitch", "Phonation Function analysis", "Spectrograph analysis"]}, {"no": 71, "q": "수술 후 근긴장성발성장애로 진단받은 남자의 음성검사결과로 옳은 것은?", "box": [], "options": ["MPT = 20sec", "MAFR = 80ml/sec", "NHR = 0.01", "F0 = 220Hz", "jtter = 1.10%"]}, {"no": 72, "q": "다음 사례 중 이중음성이 나타나는 것은?", "box": [], "options": ["성대낭종", "성대결절", "파킨슨병", "양측성대마비", "연축성발성장애"]}, {"no": 73, "q": "갑작스러운 스트레스로 음성이 나오지 않는 여성의 음성치료방법으로 적절한 것은?", "box": [], "options": ["강도변경법", "호르몬 치료법", "보톡스 시술접근법", "웃음을 이용한 발성법", "후두성형술 치료접근법"]}, {"no": 74, "q": "점막하 구개파열로 의심되는 사례는?", "box": [], "options": ["구개가 높은 아동", "치아발달이 늦은 아동", "구개수가 분리된 아동", "연구개 폐쇄가 안되는 아동", "후인두벽이 움직이지 않는 아동"]}, {"no": 75, "q": "편측성 성대마비환자에게 적용하는 음성촉진기법은?", "box": [], "options": ["이완", "음성배치법", "발성변경법", "손가락조작법", "한숨하품접근법"]}, {"no": 76, "q": "다음은 후두전적출자에게 적용하는 음성재활방법 중에서 폐로 올라온 기류를 활용하여 자신의 공명기관을 통해 발성하는 것은?", "box": [], "options": ["LSVT", "발성변경", "식도발성", "인공후두기", "기관식도발성"]}, {"no": 77, "q": "다음 음성장애를 가진 환자의 치료방법으로 가장 효과적인 것은?", "box": ["1. 대뇌기저부의 호르몬 문제로 나타남", "2. 작은 목소리와 단조로운 음성으로 발성함.", "3. 근육 진전이 동반됨.", "4. 진행성 질환으로 분류됨."], "options": ["이완", "기침", "하품", "LSVT", "accent"]}, {"no": 78, "q": "연축성 발성장애를 가진 사람에게 효과적인 치료방법은?", "box": [], "options": ["음성위생", "음도변경", "흡기발성", "보툴리늄주입술", "후두성형술 I"]}, {"no": 79, "q": "성문 폐쇄 및 주기를 인체의 전기적 특성을 활용해 간접적으로 평가할 수 있는 검사는?", "box": [], "options": ["EGG", "MDVP", "PAS/Aerophone", "spectrogram analysis", "laryngostroboscopy"]}, {"no": 80, "q": "후두성대를 이완된 상태로 50-90Hz의 주파수 대역의 음성으로 부드럽게 성대를 접촉을 유도하는 행동적 음성치료방법은?", "box": [], "options": ["이완", "성대프라이", "음성배치법", "비음유음자극", "하품-한숨접근법"]}], "answerKey": ""}, "2": {"name": "2교시", "minutes": 65, "subjects": [{"name": "언어발달장애", "from": 1, "to": 35}, {"name": "조음음운장애", "from": 36, "to": 70}], "questions": [{"no": 1, "q": "언어장애 아동의 대화 자료에서 구문표현 능력을 평가할 때 옳은 평가 기준은?", "box": [], "options": ["어순을 반드시 지켜야 한다", "주어를 생략하지 않아야 한다", "이중 주어를 사용하지 않아야 한다", "명사에 대한 형용사 전치 수식 위치를 바꾸지 않아야 한다.", "주격조사와 주제보조사를 한 문장에 표현하지 않아야 한다."]}, {"no": 2, "q": "전상징기적 단계의 상징행동 수준에 해당하는 놀이는?", "box": [], "options": ["모자를 머리에 쓴다", "숟가락으로 먹는 흉내를 낸다", "인형에게 컵으로 물을 먹이는 흉내를 낸다", "인형이 우는 것처럼 우는 척 한다", "인형에게 우유를 먹인 다음 유모차에 태운다"]}, {"no": 3, "q": "발달 초기에 이뤄지는 읽기 수준은?", "box": [], "options": ["철자 읽기", "음운 해독", "의미 이해", "읽기 유창성", "읽기 사회화"]}, {"no": 4, "q": "지적장애 아동의 언어특성에 관한 설명으로 옳은 것은?", "box": [], "options": ["구문구조 발달 수준이 어휘력 발달보다 나은 편이다.", "속담이나 자신의 생각 말하기에는 어려움이 없다.", "언어수준은 지적장애의 정도에 달려 있다.", "일단 학습한 문장구조의 일반화에는 어려움이 없다.", "구문구조의 발달 정도는 정상 아동과 유사하다."]}, {"no": 5, "q": "<보기>아동발화의 분석 결과에 대한 설명으로 옳은 것은?", "box": ["가. ‘내가 안 공부해’", "나. ‘곰이가 물고기 먹었어’", "다. ‘빨간 집에 딸기 샀어’"], "options": ["부정표현을 정확하게 산출한다.", "관형형 어미 사용은 관찰되지 않는다.", "주격 조사를 정확하게 사용한다.", "표현어휘 제한으로 창의적 표현이 관찰된다.", "장소격 조사를 전혀 표현하지 못한다."]}, {"no": 6, "q": "의미론 지식을 평가하기 위한 질문은?", "box": [], "options": ["‘바지’는 몇 개의 소리로 이뤄져 있나요?", "‘엄마는 회사( ) 갔어요’에 들어갈 말은 무엇인가요?", "‘학교’에서 ‘교’라는 말을 빼면 어떤 말이 남을까요?", "‘보리, 쌀, 콩’같은 것들을 모두 무엇이라고 하나요?", "‘강아지가 달려 왔어요. 꼬리를 흔들었어요’를 연결해서 말해보세요."]}, {"no": 7, "q": "다음에서 평가하고자 하는 언어 능력은?", "box": ["-듣는 사람이 서로의 참조물을 볼 수 없다는 것을 알고 적절하게 자신의 참조물을 잘 설명할 수 있어야 함", "-확장된 담화(게임 방법 설명하기): 대명사, 생략, 접속부사, 연결어미 등을 잘 이용할 수 있어야 함", "-비슷한 두 장의 그림 묘사하기: 두 번째 그림에서 겹치는 부분은 생략하거나 이전 그림의 내용을 고려해서 이야기 할 수 있어야 함"], "options": ["낱말찾기", "어휘지식", "전제", "이야기", "비유어"]}, {"no": 8, "q": "다음 아동이 사용하지 않은 의미관계는?", "box": ["‘이거 먹어’, ‘아빠 차’, ‘여기 입어’, ‘아가 우유’, ‘맘마 먹어’, ‘여기 물’"], "options": ["[실체-서술]", "[대상-행위]", "[행위자-대상]", "[장소-실체]", "[장소-행위]"]}, {"no": 9, "q": "다음에서 설명하는 표준화 검사의 점수 형태는?", "box": ["- 규준참조 집단에서 주어진 점수에 도달한 사람 또는 미치지 못한 사람의 비율을 나타냄.", "- 이해하고 해석하기 쉬우므로, 부모나 교사와 아동이 수행한 정도를 상담할 때 자주 사용됨."], "options": ["표준편차", "원점수", "표준점수", "등가점수", "백분위"]}, {"no": 10, "q": "초기 어휘 습득 과정에 대한 설명으로 올바른 것은?", "box": [], "options": ["초기 50개의 어휘목록 중에는 동사가 큰 비중을 차지한다.", "빠른 연결(fast mapping)로 어휘발달이 가속화된다.", "어휘 폭발은 3세 이후에 비로소 나타나기 시작한다.", "대상의 새로운 이름은 대상의 일부를 가리키는 것으로 가정한다.", "긍정보다는 부정적인 개념을 나타내는 어휘를 먼저 습득한다."]}, {"no": 11, "q": "언어 중재를 진행한 후의 진전평가에 대한 설명으로 옳은 것은?", "box": [], "options": ["중재 후 변화가 있었던 내용만을 평가한다.", "중재내용을 포함하여 중재과정을 중심으로 평가한다.", "장단기 계획의 평가 준거와 관계없이 아동의 현재 언어능력을 평가한다.", "비공식 검사도구를 사용하지 않는다.", "초기 평가에서 틀린 문제를 재평가한다."]}, {"no": 12, "q": "REVT 검사에서 또래 수준의 표현어휘력을 보이지만 상위 의미 이해에 어려움을 보이는 경우 추가로 진행할 수 있는 검사는?", "box": [], "options": ["PRES", "UW-SET", "K TTFC-2", "KONA", "LSSC"]}, {"no": 13, "q": "다음 진단 기준에 의한 DSM-5의 진단명은?", "box": ["아동의 화용적 어려움이 단어구조 형성이나 일반적인 인지발달 지체로 인한 것이 아니며, 이러한 화용론적 어려움으로 인해 효과적이 의사소통과 사회적 참여, 학업과 직업적 성취에 문제를 야기하는 경우"], "options": ["비구어학습장애", "사회의사소통장애", "자폐스펙트럼장애", "의미화용장애", "단순언어장애"]}, {"no": 14, "q": "중도장애 또는 심한 자폐스펙트럼장애 아동의 언어중재에 관한 설명으로 적절하지 않은 것은?", "box": [], "options": ["의사소통시도하기 훈련을 위해 감각 자극을 제외한 아동의 주변 환경을 수정한다.", "“차례 지키기”를 통하여 아동은 스스로 표현하는 방법을 배울 수 있다.", "아동에게 익숙한 구조화된 일과는 의사소통 활동으로 사용될 수 있다.", "의사소통 능력 증진을 위해 다음에 일어날 일을 예상하도록 촉진할 수 있다.", "중재 절차와 방법 설정을 위해 부모나 교사의 의견을 경청한다."]}, {"no": 15, "q": "고기능 자폐스펙트럼장애 아동의 언어특성에 관한 설명으로 바른 것은?", "box": [], "options": ["말의 운율적인 특성에서는 아무런 이상이 없다.", "함께 주의하기(joint attention) 기술이 매우 발달되어 있다.", "의사소통 능력보다 문법능력에서 심각한 결함을 보인다.", "구문 발달은 정상 또래아동에 비해 느리나 유사한 발달과정을 거친다.", "반향어를 매우 기능적으로 사용하는 경향이 있다."]}, {"no": 16, "q": "다음 중 음운/구문론, 인지/의미론, 화용론 영역의 평가가 동시에 가능한 검사끼리 바르게 짝지은 것은?", "box": ["가. 구문의미이해력검사", "나. 영유아 언어발달검사", "다. 취학전 아동의 수용언어 및 표현언어 척도", "라. 언어문제해결력검사", "마. K M-B CDI"], "options": ["가, 라", "나, 다", "다, 라", "라, 마", "가, 다"]}, {"no": 17, "q": "아동의 상위 언어 능력을 중재하기 위한 언어 목표는?", "box": [], "options": ["자신의 의도를 말로 요구하기", "복문 표현하기", "문장의 의미적 오류 수정하기", "어중 초성 /ㄹ/산출하기", "표현 어휘 수 향상"]}, {"no": 18, "q": "역동적 평가에 대한 설명으로 바르지 않은 것은?", "box": [], "options": ["사전검사-중재-사후검사의 형식을 취한다.", "Vygotsky의 근접발달영역(ZPD)에 근거한 것이다.", "사회적 상호작용이 있는 문맥에서 평가가 이루어진다.", "최소한의 문맥적 지원하에 아동의 현재 수행 수준을 보고자 한다.", "평가 과정에서 시도치료 형태의 중재 접근을 한다."]}, {"no": 19, "q": "다음 학령전 언어발달장애 아동이 엄마와 주고받는 대화 과정을 분석한 후의 치료 목표로 가장 적절한 것은?", "box": ["(엄마와 아동이 인형과 인형 옷을 가지고 놀고 있는 상황)", "엄마:(아동이 인형에게 바지를 입히자) “아기한테 옷 입히는 거야?”", "아동: “아니, 바지 입어”", "(다양한 사람 인형과 동물 인형들을 가지고 놀고 있는 상황)", "엄마:(아동이 장난감 버스에 아기, 아빠, 엄마 인형들을 차례 태우자) “차에 동물도 태우자”", "아동:“아니, 기린 태울 거야”"], "options": ["조사 이해", "종결어미 활용", "의미관계 표현", "사동/피동 접사 표현", "범주어 이해"]}, {"no": 20, "q": "아동 언어평가 도구에 대한 설명으로 옳은 것은?", "box": [], "options": ["PRES는 부모 대상의 체크리스트이다.", "구문의미이해력 검사는 기초선 수립이 필요하다.", "언어문제해결력 검사는 최고한계선 수립이 필요하다.", "한국 아동 토큰 검사는 청각적 이해력을 평가한다.", "K M-B CDI는 영유아의 어휘력만을 평가한다."]}, {"no": 21, "q": "다음은 어떠한 검사에 관한 설명인가?", "box": ["- 2세 6개월 이상에게 실시한다.", "- 표현 검사 후 수용 검사를 진행한다.", "- 연속해서 8개 문항을 정반응하면 기초선으로 정한다.", "- 8개 문항 중 6개에 오반응하면 최고한계선으로 정한다."], "options": ["K TTFC-2", "UW-SET", "REVT", "PRES", "K BNT-C"]}, {"no": 22, "q": "자발적 발화 분석을 통한 언어진단과 관련한 설명으로 바른 것은?", "box": [], "options": ["진단보다는 선별에 목적을 둔다.", "정확한 수용언어능력을 알고자 실시한다.", "아동이 평소보다 길게 말한 언어를 수집하여 분석한다.", "자신의 말이 수집되고 있음을 아동이 인식하지 않아야 한다.", "50~100 발화를 수집하여 분석한 평가 결과만을 신뢰할 수 있다."]}, {"no": 23, "q": "‘말늦은 아동(late-talker)’에 대한 설명으로 옳은 것은?", "box": [], "options": ["특히 수용언어발달에서 지체를 나타난다.", "일반적으로 1세 이하의 아동을 일컫는다.", "언어장애 위험군(at-risk)이라고 할 수는 없다.", "대부분이 전반적 발달장애나 자폐범주성장애로 진단된다.", "이후 또래의 정상범주 수준을 따라잡는(catch-up)경우도 있다."]}, {"no": 24, "q": "언어진단 보고서의 작성과 관련된 설명으로 옳은 것은?", "box": [], "options": ["비공식 검사나 관찰을 한 경우 검사방법을 간단히 기술한다.", "검사도구의 저자와 발간연도는 기입하지 않아도 된다.", "진단결과에 대한 요약과 권고사항 기재는 필수요소는 아니다.", "중중 아동일 경우 가능한 아동이 잘하지 못하는 것을 나열해야 한다.", "등가연령이나 백분위 점수보다는 반드시 원점수를 기재한다."]}, {"no": 25, "q": "다음의 예에서 치료사가 사용한 치료 기법은?", "box": ["“고양이가 생쥐를 쫒아가요.”라는 아동의 말에 치료사가 “생쥐가 고양이한테 쫓기고 있어요.”라고 반응한다."], "options": ["확장(expansion)", "확대(extension)", "문장의 재구성(recast sentences)", "평행적 발화기법(parallel-talk)", "혼자말 기법(self-talk)"]}, {"no": 26, "q": "중도 언어장애 아동의 중재와 관련한 설명으로 바른 것은?", "box": [], "options": ["상향적 접근법에 근거하여 중재목표를 세운다.", "중재에 가족 구성원의 참여를 최대한 배제시킨다.", "가능한 말과 문자 언어 습득에 초점을 두어 중재한다.", "생활연령을 함께 고려한 자료를 제공하여 기능적 소통을 유도한다.", "언어표현의 기초가 되는 말소리 목록 증진에 치료의 주안점을 둔다."]}, {"no": 27, "q": "읽기에 결함이 있는 아동의 읽기이해 능력 향상을 위한 중재방법으로 올바른 것은?", "box": [], "options": ["서로 다른 두 단어에서 같은 소리를 찾게 한다.", "새로운 단어 의미를 파악하는 데 필요한 전략을 가르친다.", "자소일치단어와 자소불일치단어가 혼합된 문장을 읽게 한다.", "음절 길이에 차이가 나는 단어들을 구분하는 훈련을 한다.", "새로운 음을 한 번 듣고 따라하게 한다."]}, {"no": 28, "q": "다음 중 아동의 구문능력을 살펴보는 측정치로 볼 수 없는 것은?", "box": [], "options": ["복문 유형", "T-unit 당 절의 수", "MLU-w", "NTW", "MLT-w"]}, {"no": 29, "q": "다음에서 설명하는 아동 언어검사 도구는?", "box": ["- 부모보고에 의한 체크리스트이다.", "- 축약판이 개발되어 있다.", "- 평가 내용 가운데 문법 관련 어휘가 포함되어 있다.", "- 아동의 제스처 표현을 평가한다."], "options": ["REVT", "K CSBS-DP", "SELSI", "U-TAP", "K M-B CDI"]}, {"no": 30, "q": "학령기 아동의 언어중재 시 고려할 사항으로 적절하지 않은 것은?", "box": [], "options": ["발달 중재계획은 아동의 필요와 능력에 기초해서 구성한다.", "의사소통능력에 초점을 두는 치료방법은 마지막으로 선택한다.", "한 가지 이상의 상황에서 행할 수 있는 전략을 훈련시킨다.", "프로브를 사용하여 진전 상황을 주기적으로 평가한다.", "아동의 문해력을 고려하여 중재계획에 포함한다."]}, {"no": 31, "q": "다음은 학령기 아동의 중재방법 중 어떠한 언어 구성요소에 대한 접근인가?", "box": ["- 사전의 내용, 발음, 표기법을 자세히 알기", "- 구어와 읽기자료의 맥락을 활용하여 단어 익히기", "- 새롭게 정의되는 단어를 교과서 문맥에서 활용하기"], "options": ["의미론", "화용론", "형태론", "통사론", "음운론"]}, {"no": 32, "q": "다음 아동의 발화에서 평균형태소길이(MLU-m)는?", "box": ["“집에 갔어” “빵 먹고” “집”"], "options": ["1.5", "2", "3", "3.5", "4"]}, {"no": 33, "q": "한 낱말 발화 수준에, 표현어휘 수는 50개 정도인 ‘말늦은 아동’을 위한 의미 영역의 치료목표로 가장 적절한 것은?", "box": [], "options": ["몸짓 등 다양한 의사소통기능 확장", "[대상-행위] 의미관계 표현", "[행위자-장소-행위] 의미관계 표현", "‘위, 아래, 안, 밖’ 등의 위치어 표현", "과일과 채소 등 분류개념"]}, {"no": 34, "q": "설명담화(expository discourse) 능력을 평가하는 방법으로 적절한 것은?", "box": [], "options": ["발화의 차례맡기가 포함되는 스크립트를 말하게 한다.", "가장 친한 친구와 끝말잇기를 하는 과정을 관찰한다.", "아동이 제일 좋아하는 계절에 대해 이야기하게 한다.", "연설, 지구 등과 같은 단어의 정의하기를 하게 한다.", "단어에서 음절을 분리하는 것과 같은 평가를 한다."]}, {"no": 35, "q": "보완대체 의사소통 가운데 unainded 상징에 해당하는 것은?", "box": [], "options": ["PCS", "컬러그림", "흑백사진", "손담", "블리스 상징"]}, {"no": 36, "q": "인간의 말소리 지각능력에 관한 설명은?", "box": [], "options": ["후천적인 학습에 의해 습득", "어휘폭발기에 지각발달 완성", "음향신호를 범주적으로 지각", "언어권에 따라 지각발달 단계가 다름", "말소리 지각보다 산출이 선행하여 발달"]}, {"no": 37, "q": "우리 말소리에 관한 설명으로 적절한 것은?", "box": [], "options": ["종성에서 자음군이 실현된다.", "음절을 이루는 기본 요건은 모음이다.", "초성에서는 19개 자음이 실현된다.", "운율이 실현되는 최소 단위는 음소이다.", "평장애음은 어두초성에서 유성음으로 실현된다."]}, {"no": 38, "q": "최소대립쌍으로 적절한 것은?", "box": [], "options": ["낮-낯", "물-몸", "말-날", "낳다-남다", "오리-고리"]}, {"no": 39, "q": "[노래]에서 발음된 유음에 관한 설명으로 적절한 것은?", "box": [], "options": ["장애자음이다.", "음절핵을 이룰 수 있다.", "설측성 자질을 가진 소리이다.", "[술래]의 어중초성과 동일한 발음이다.", "폐쇄지속시간이 가장 짧은 다막음소리이다."]}, {"no": 40, "q": "반복적 옹알이 단계의 유아들이 가장 선호하는 음절 구조는?", "box": [], "options": ["폐음절 반복", "CVC음절 반복", "CVCV음절 반복", "고모음 음절 반복", "후설 고모음 반복"]}, {"no": 41, "q": "초기 음운발달 시기(1-2세)에 관한 설명으로 가장 적절한 것은?", "box": [], "options": ["첫낱말부터 50단어시기이다.", "모음의 분화가 완성되는 시기이다.", "어휘폭발기로 규칙지배전략을 사용한다.", "어휘들간의 음운적인 관련성을 습득한다.", "대부분의 음절구조를 자유롭게 사용한다."]}, {"no": 42, "q": "음절과 어절내 위치의 자음 발달에 관한 설명으로 적절한 것은?", "box": [], "options": ["연구개비음은 초성에서 먼저 발달한다.", "어말종성이 어중종성보다 먼저 발달한다.", "어두초성이 어중초성보다 늦게 발달한다.", "설측음은 종성보다 초성에서 먼저 발달한다.", "탄설음은 종성보다 초성에서 먼저 발달한다."]}, {"no": 43, "q": "'해돋이 찾집'에 일어나는 음운의 변동은?", "box": [], "options": ["격음화, 연음화, 경음화", "평폐쇄음화, 격음화, 연음화", "자음군 단순화, 경음화, 연음화", "구개음화, 평폐쇄음화, 경음화", "자음군단순화, 경음화, 격음화"]}, {"no": 44, "q": "4세까지 나타나는 일반적인 음운오류패턴은?", "box": [], "options": ["‘자동차’ →[자오차]", "'옥수수 ' →[옥추추]", "'옥수수 ' →[옥뿌뿌]", "'자동차 ' →[가공카]", "'자전거 ' →[다던거]"]}, {"no": 45, "q": "다음의 3세 아동들(언어발달은 정상) 중에서 우선적으로 조음치료가 요구되는 대상은?", "box": [], "options": ["초성/ㄹ/를 생략하는 아동", "초성/ㄱ, ㄲ, ㅋ/를 생략하는 아동", "어중 초성 /ㄹ/를 /ㄴ/로 대치하는 아동", "/ㅅ, ㅆ/를 /ㄷ, ㄸ, ㅌ/로 대치하는 아동", "/ㅈ, ㅉ, ㅊ/를 /ㄷ, ㄸ, ㅌ/로 대치하는 아동"]}, {"no": 46, "q": "구어명료도가 가장 낮을 것으로 예상되는 아동은?", "box": [], "options": ["/ㅅ/를 오조음하는 아동", "/ㅎ/를 오조음하는 아동", "/ㅂ/를 오조음하는 아동", "/ㄷ/를 오조음하는 아동", "/ㄹ/를 오조음하는 아동"]}, {"no": 47, "q": "다음은 7세 아동의 발화이다. 발달적으로 문제가 되는 음소는?", "box": ["우리 아빠는 하꾜 가고 우리 엄마는 가게 가떠", "난 지베. 우리 지베 멍멍이도 이떠."], "options": ["/ㅆ/", "/ㅅ/", "/ㄸ/", "/ㄱ/", "/ㅂ/"]}, {"no": 48, "q": "[+전방성], [+설정성], [-비음성], [-긴장성], [-기식성], [-지속성], [-지연개방성], [-설측성] 자질을 가진 음소가 포함된 단어는?", "box": [], "options": ["소리", "다리", "오리", "무리", "고리"]}, {"no": 49, "q": "다음의 노래를 부를 수 있는 음운인식 수준은?", "box": ["“리리릿자로 끝나는 말은 괴나리, 보따리, 댑싸리, 소쿠리, 유리 항아리“"], "options": ["운율수준", "단어수준", "음절수준", "음소수준", "어절수준"]}, {"no": 50, "q": "/없어/를 [ʌsʌ]로 발화한 아동의 PMLU는?", "box": [], "options": ["7", "6", "5", "4", "3"]}, {"no": 51, "q": "다음 구어 샘플에서 자음정확도는?", "box": ["(아동의 의도): \"엄마, 안 먹었어? 옥수수 두개 먹었어.\"", "(아동의 산출): \"엄마, 안 머거떠? 오뚜뚜 두대 무구뚜.\""], "options": ["(9/14) × 100", "(8/14) × 100", "(7/14) × 100", "(9/12) × 100", "(8/12) × 100"]}, {"no": 52, "q": "한단어이름대기검사로 조음음운능력을 평가할 때의 장점은?", "box": [], "options": ["오조음의 일관성을 검사할 수 있다.", "우리말의 모든 음소를 검사할 수 있다.", "소요시간과 분석시간이 상대적으로 길다.", "평상시 의사소통에서 보이는 조음능력을 검사할 수 있다.", "시각, 청각, 촉각을 통한 모방하기 방법을 통해 검사할 수 있다."]}, {"no": 53, "q": "초등학교에 입학한 아동들의 음운발달 정도를 알아보기 위해 실시하는 검사방법으로 가장 적절한 것은?", "box": [], "options": ["산출한 말소리 목록과 음절구조분석을 실시한다.", "우리말 자모음이 포함된 단어 따라 말하기를 실시한다.", "사전 검사에서 오조음한 음소에 대한 모방검사를 실시한다.", "또래와의 비교를 위해 표준화된 조음음운 평가를 실시한다.", "평소 의사소통 상황을 유도하기 위해 자발화 검사를 실시한다."]}, {"no": 54, "q": "/ㄱ/를 유도하여 산출하는데 가장 적절한 문맥은?", "box": [], "options": ["/가/", "/기/", "/그/", "/개/", "/고/"]}, {"no": 55, "q": "조음음운장애 표준화검사에 관한 설명으로 적절한 것은?", "box": [], "options": ["신뢰도는 높지만 타당도는 낮다.", "비공식적인 자발화 방법을 통해 검사한다.", "언어발달 검사의 하위문항으로 구성되어져 있다.", "또래의 규준이 있어 동일 생활연령내 서열화가 가능하다.", "유동적이며 반응적인 진행 절차에 따라 음운평가를 진행한다."]}, {"no": 56, "q": "다음 구어 샘플에서 단어명료도는(x는 알아듣지 못한 음절을 뜻함)?", "box": ["(아동의 의도): \"그래서 못 샀어요. 시장에 가서 오겹살 먹고 왔어요.\"", "(아동의 산출): \"그래떠 × 사떠요. ××에 가떠  ××× 머꼬 와떠요.\"", "(화자의 전사): \"그래서 × 사써요. ××에 가서  ××× 머꼬 와써요.\""], "options": ["1/8 × 100", "2/8 × 100", "3/8 × 100", "4/8 × 100", "5/8 × 100"]}, {"no": 57, "q": "파열음 동화 오류가 포함된 예는?", "box": [], "options": ["주사위 → [두다위]", "리모콘 → [니모콘]", "미끄럼 → [미끄덤]", "거미줄 → [저미줄]", "오징어 → [오딩어]"]}, {"no": 58, "q": "취학전 아동의 조음음운치료 중 간접 치료방법으로 조음음운 연습기회를 늘리고 상황일반화 효과를 유도할 수 있는 방법은?", "box": [], "options": ["책읽기", "노래하기", "반복훈련", "경험놀이", "형제훈련하기"]}, {"no": 59, "q": "목표음소가 더 쉽게 산출될 수 있는 조건은?", "box": [], "options": ["음절수가 많을수록", "오류음이 중복될수록", "조음위치가 근접할수록", "음절 구조가 폐쇄형일수록", "오류 빈도가 높을수록"]}, {"no": 60, "q": "다음에서 가장 변별하기 어려운 최소단어짝은?", "box": [], "options": ["말-달", "달-탈", "쌀-달", "알-달", "달-칼"]}, {"no": 61, "q": "학령전기 조음음운장애 아동의 목표음소가 어중종성 /ㄱ/일 때, 초기 훈련낱말로 가장 적절한 것은?", "box": [], "options": ["개미", "학교", "먹어", "감기", "박수"]}, {"no": 62, "q": "일반적인 조음음운치료를 할 때 목표음소의 우선 순위를 결정하는 기준으로 가장 적절한 것은?", "box": [], "options": ["시각적 단서가 낮은 음소를 선택한다.", "음운변동율이 높은 패턴을 선택한다.", "자극반응도가 없는 음소를 선택한다.", "후기에 발달하는 음소를 선택한다.", "사용빈도가 낮은 음소를 선택한다."]}, {"no": 63, "q": "철수는 모음 /ㅏ, ㅐ, ㅡ, ㅗ/와 자음/ㅁ, ㅂ, ㅃ, ㄴ, ㄷ, ㄱ/)를 사용한 20개 내외의 어휘만을 산출할 수 있다. 철수에게 자극반응도를 실시하였을 때 가장 낮은 자극반응도를 나타낼 것으로 기대되는 단어는?", "box": [], "options": ["아빠", "엄마", "몰라", "낸내", "안돼"]}, {"no": 64, "q": "다음의 치료테크닉을 이용하기에 가장 적절한 단어는?", "box": ["혀끝을 치경에 붙이고 혀의 측면으로 기류를 지속적으로 내보낸다."], "options": ["/라면/", "/놀이/", "/노래/", "/마술/", "/리본/"]}, {"no": 65, "q": "조음음운장애 치료에서 주기적 접근법에 대한 설명은?", "box": [], "options": ["경증의 조음음운장애 아동에게 효과적이다.", "한 주기에 하나의 오류음소를 치료하는 방법이다.", "한 주기는 60분을 실시하면 다음 주기로 진행한다.", "대치 오류가 많을 때 주로 적용하는 치료 방법이다.", "70% 준거 기준에 도달하였을 때 다음 단계로 진행한다."]}, {"no": 66, "q": "조음음운 치료 중에서 단어수준에서의 목표음소 자동화를 강조하는 치료방법은?", "box": [], "options": ["주기법", "전통적 기법", "짝자극 기법", "의사소통 중심법", "음운변동 접근법"]}, {"no": 67, "q": "어음검사의 설명으로 적절한 것은?", "box": [], "options": ["다양한 주파수에서 검사를 실시한다.", "영유아에게 실시하기 적절한 검사이다.", "순음검사와 동일한 검사 결과를 얻어야 한다.", "일상 의사소통능력을 유추할 수 있는 검사이다.", "어음을 사용하기 때문에 피검자가 알아듣기 어렵다."]}, {"no": 68, "q": "영유아의 난청을 진단하기 위한 객관적인 검사방법은?", "box": [], "options": ["유희청력검사", "반사청력검사", "시각강화검사", "이음향방사검사", "조작조건화검사"]}, {"no": 69, "q": "청각인지의 원리에 대한 설명으로 적절한 것은?", "box": [], "options": ["소리의 주파수 분석은 달팽이관에서 이루어짐", "기저막의 움직임은 소리인지에 매우 수동적임", "소리의 강도 분석은 전정기관에서 이루어짐", "소리전달을 위한 내이의 매질은 공기임", "기저회전은 저주파수를 분석"]}, {"no": 70, "q": "청력손실 정도에 따른 설명으로 가장 적절한 것은?", "box": [], "options": ["16～25 ㏈ HL : 선천성 내이질환으로 발생", "26～40 ㏈ HL : 고도의 표현 언어장애", "41～65 ㏈ HL : 언어발달은 정상이나 청각재활이 필요함", "66～95 ㏈ HL : 조기 청각재활과 특수교육이 필요함", "96 ㏈ HL 이상 : 보청기를 통한 청각재활이 가능함"]}], "answerKey": ""}}};
+
+/* ===================== 상태 ===================== */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const CIRC = ['①','②','③','④','⑤'];
+
+const state = {
+  session: null, sess: null,      // '1' | '2', 세션 데이터
+  page: 0, layout: 1, fontScale: 1,
+  answers: {}, checks: new Set(), elims: {}, memos: {},
+  hlMode: {},                      // qno -> true(형광펜 켜짐)
+  hlStrokes: {},                   // qno -> [{w, pts:[{x,y}...]}]  자유 필기 획
+  timerId: null, remainSec: 0,
+  results: {},                     // 교시별 채점 결과 (페이지 세션 동안 유지)
+  user: {num:'', name:'', birth:''},
+  memoOpenFor: null,
+};
+const HL_COLOR = '#ffe94d';   // 형광펜 색 (실제 시험과 동일하게 1색)
+const HL_WIDTH = 15;
+const HL_BLEND = !!(window.CSS && CSS.supports && CSS.supports('mix-blend-mode','multiply'));
+
+function go(name){
+  $$('.screen').forEach(el=>el.classList.remove('active'));
+  $('#screen-'+name).classList.add('active');
+}
+
+/* ===================== 초기화 ===================== */
+function examTitleText(){ return EXAM_DATA.examTitle + (EXAM_DATA.round ? ' ('+EXAM_DATA.round+')' : ''); }
+function initIntro(){
+  $('#introTitle').textContent = EXAM_DATA.examTitle;
+  $('#loginExamName').textContent = examTitleText();
+  updateSessionInfo();
+  $('#selSession').addEventListener('change', updateSessionInfo);
+  $('#inpNum').addEventListener('input', e=>{ e.target.value = e.target.value.replace(/[^0-9]/g,'').slice(0,20); });
+  ['#inpNum','#inpName'].forEach(sel=>$(sel).addEventListener('input', checkLoginReady));
+  // 여러 학생이 같은 컴퓨터를 쓰므로 이전 응시자 정보는 자동으로 채우지 않습니다.
+  flushPending();   // 이전에 전송하지 못한 답안이 있으면 다시 보냄
+}
+function checkLoginReady(){
+  const ok = $('#inpNum').value.trim().length>=4 && $('#inpName').value.trim();
+  $('#btnLogin').classList.toggle('ready', !!ok);
+}
+function updateSessionInfo(){
+  const s = EXAM_DATA.sessions[$('#selSession').value];
+  const subjTxt = s.subjects.map(x=>`${x.name}(${x.to-x.from+1})`).join(', ');
+  $('#sessionInfoLine').textContent = `※ ${s.name}: ${subjTxt} — 총 ${s.questions.length}문항 / ${s.minutes}분`;
+  const done = state.results[$('#selSession').value];
+  if(done) $('#sessionInfoLine').textContent += '  (이 창에서 이미 제출함 — 다시 응시하면 마지막 제출 답안으로 바뀝니다)';
+}
+
+/* ===================== 시험 시작 ===================== */
+let loginBusy = false;
+async function startExam(){
+  if(loginBusy) return;
+  const num = $('#inpNum').value.trim(), name = $('#inpName').value.trim();
+  if(!/^\d{4,20}$/.test(num)){ alert('학번을 숫자로 정확히 입력해 주세요.'); return; }
+  if(!name){ alert('성명을 입력해 주세요.'); return; }
+  const sessSel = $('#selSession').value;
+  loginBusy = true;
+  const btn = $('#btnLogin'); const oldTxt = btn.textContent; btn.textContent = '서버 연결 중…';
+  try{
+    await api('gexam_start', {p_exam:EXAM_ID, p_no:num, p_name:name, p_session:sessSel}, 12000);
+  }catch(e){
+    alert('시험 서버에 연결할 수 없습니다.\n인터넷 연결을 확인한 뒤 다시 로그인해 주세요.');
+    return;
+  }finally{ loginBusy = false; btn.textContent = oldTxt; }
+  state.user = {num, name};
+  state.session = sessSel;
+  state.sess = EXAM_DATA.sessions[state.session];
+  state.page = 0; state.layout = 1;
+  state.answers = {}; state.checks = new Set(); state.elims = {}; state.memos = {}; state.hlMode = {};
+  state.hlStrokes = {};
+  state.remainSec = state.sess.minutes*60;
+  state.startedAt = new Date().toISOString();
+
+  $('#hdNum').textContent = num;
+  $('#hdName').textContent = name;
+  $('#hdTitle').textContent = `${examTitleText()} — ${state.sess.name}`;
+  setLayoutButtons();
+  buildOMR();
+  renderPage();
+  startTimer();
+  go('exam');
+}
+
+function validBirth6(b){
+  const mm = +b.slice(2,4), dd = +b.slice(4,6);
+  return mm>=1 && mm<=12 && dd>=1 && dd<=31;
+}
+function subjectOf(no){
+  return state.sess.subjects.find(s=>no>=s.from && no<=s.to);
+}
+
+/* ===================== 타이머 ===================== */
+function startTimer(){
+  clearInterval(state.timerId);
+  tickTimer();
+  state.timerId = setInterval(tickTimer, 1000);
+}
+function tickTimer(){
+  const t = state.remainSec;
+  const h = String(Math.floor(t/3600)).padStart(2,'0');
+  const m = String(Math.floor(t%3600/60)).padStart(2,'0');
+  const s = String(t%60).padStart(2,'0');
+  $('#timerText').textContent = `${h}:${m}:${s}`;
+  $('#timerBox').classList.toggle('warn', t<=300);
+  if(t<=0){
+    clearInterval(state.timerId);
+    alert('시험 시간이 종료되었습니다. 답안을 자동으로 제출합니다.');
+    submitExam();
+    return;
+  }
+  state.remainSec--;
+}
+
+/* ===================== 페이지 / 문항 렌더 ===================== */
+function pageCount(){ return Math.ceil(state.sess.questions.length / state.layout); }
+function isOnScreen(no){
+  return pageQuestions().some(q=>q.no===no);
+}
+function pageQuestions(){
+  const start = state.page*state.layout;
+  return state.sess.questions.slice(start, start+state.layout);
+}
+function renderPage(){
+  const wrap = $('#qWrap');
+  wrap.innerHTML = '';
+  pageQuestions().forEach(q=>wrap.appendChild(buildQPanel(q)));
+  wrap.style.fontSize = state.fontScale+'em';
+  $('#pageText').textContent = `${state.page+1}/${pageCount()}`;
+  $('#btnPrev').disabled = state.page===0;
+  $('#btnNext').disabled = state.page===pageCount()-1;
+  syncOMRHighlight();
+  updateCounts();
+  requestAnimationFrame(fitAllHlCanvas);
+}
+function buildQPanel(q){
+  const subj = subjectOf(q.no);
+  const panel = document.createElement('div');
+  panel.className = 'qpanel';
+  panel.dataset.qno = q.no;
+  if(state.hlMode[q.no]) panel.classList.add('hl-mode');
+
+  const memoHas = state.memos[q.no] ? ' on' : '';
+  const chkOn = state.checks.has(q.no) ? ' on' : '';
+  panel.innerHTML = `
+    <canvas class="hl-canvas"></canvas>
+    <div class="qcontent">
+    <div class="qhead">
+      <div style="flex:1">
+        <div class="subj-tag">${state.sess.name} · 제${state.sess.subjects.indexOf(subj)+1}과목 ${subj.name}</div>
+        <h2>문항 풀이</h2>
+      </div>
+      <button class="tool-btn${chkOn}" data-act="check"><span class="ic">✔</span>체크문제</button>
+      <button class="tool-btn${memoHas}" data-act="memo"><span class="ic">📝</span>메모</button>
+    </div>
+    <div class="guide-line">가장 적합한 답을 하나만 고르시오.</div>
+    <div class="qbody">
+      <div style="display:flex">
+        <div style="flex:1">
+          <div class="qno-stem"><span class="no">${q.no}.</span><span class="stem hl-target">${esc(q.q)}</span></div>
+          ${q.boxHtml ? `<div class="qbox hl-target qbox-rich">${q.boxHtml}</div>` : ''}
+          ${q.box && q.box.length ? `<div class="qbox hl-target">${q.box.map(esc).join('\n')}</div>` : ''}
+          ${q.img ? `<div class="qfig">${q.img.slice(0,4)==='data' ? `<img src="${q.img}" alt="문항 그림">` : q.img}</div>` : ''}
+        </div>
+        <div class="hl-tools">
+          <button class="hl-btn${state.hlMode[q.no]?' on':''}" data-act="hl-on">형광펜<br>${state.hlMode[q.no]?'켜짐':'꺼짐'}</button>
+          <button class="hl-btn" data-act="hl-clear">형광펜<br>지우기</button>
+        </div>
+      </div>
+      <div class="opts">
+        ${q.options.map((o,i)=>{
+          const sel = state.answers[q.no]===i+1 ? ' sel' : '';
+          const elim = (state.elims[q.no]||new Set()).has(i+1) ? ' elim' : '';
+          return `<div class="opt${sel}${elim}" data-opt="${i+1}">
+            <div class="pick"><span class="circ"><span>${CIRC[i]}</span></span><span class="otext hl-target">${esc(o)}</span></div>
+            <button class="elim-btn${elim?' on':''}" data-act="elim">오답</button>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    </div>`;
+
+  panel.addEventListener('click', e=>{
+    const actBtn = e.target.closest('[data-act]');
+    if(actBtn){
+      const act = actBtn.dataset.act;
+      if(act==='check') toggleCheck(q.no);
+      else if(act==='memo') openMemo(q.no);
+      else if(act==='hl-on') toggleHl(q.no);
+      else if(act==='hl-clear') clearHl(q.no);
+      else if(act==='elim') toggleElim(q.no, +actBtn.closest('.opt').dataset.opt);
+      return;
+    }
+    if(state.hlMode[q.no]) return; // 형광펜 모드에서는 답안 클릭 무시(필기 전용)
+    const pick = e.target.closest('.pick');
+    if(pick) setAnswer(q.no, +pick.closest('.opt').dataset.opt);
+  });
+  panel.addEventListener('pointerdown', e=>{
+    if(!state.hlMode[q.no]) return;
+    if(e.target.closest('[data-act]')) return;
+    if(e.button!==undefined && e.button!==0) return;
+    hlPointerDown(panel, q.no, e);
+  });
+  return panel;
+}
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ===================== 답안/체크/오답소거 ===================== */
+function setAnswer(no, v){
+  if(state.answers[no]===v) delete state.answers[no];
+  else state.answers[no]=v;
+  refreshQuestionPanels(no);
+  refreshOMRRow(no);
+  updateCounts();
+}
+function toggleCheck(no){
+  state.checks.has(no) ? state.checks.delete(no) : state.checks.add(no);
+  refreshQuestionPanels(no);
+  refreshOMRRow(no);
+  updateCounts();
+}
+function toggleElim(no, v){
+  state.elims[no] = state.elims[no] || new Set();
+  state.elims[no].has(v) ? state.elims[no].delete(v) : state.elims[no].add(v);
+  refreshQuestionPanels(no);
+}
+function refreshQuestionPanels(no){
+  $$('.qpanel').forEach(p=>{
+    if(+p.dataset.qno===no){
+      const q = state.sess.questions[no-1];
+      const np = buildQPanel(q);
+      p.replaceWith(np);
+      requestAnimationFrame(()=>fitHlCanvas(np));
+    }
+  });
+}
+
+/* =====================================================================
+   형광펜 — 마우스로 자유롭게 칠하는 방식 (그림판형)
+   · 각 문항 패널 위에 투명 캔버스를 얹고, 필기 획을 state.hlStrokes에 보관
+   · 글자 위에 곱하기(multiply) 합성으로 겹쳐 실제 형광펜처럼 보이게 처리
+   ===================================================================== */
+let hlDraw = null;
+
+function hlCanvasOf(panel){ return panel.querySelector('.hl-canvas'); }
+
+function fitHlCanvas(panel){
+  const cv = hlCanvasOf(panel); if(!cv) return;
+  const w = Math.max(1, panel.clientWidth);
+  const h = Math.max(panel.scrollHeight, panel.clientHeight, 1);
+  if(cv.width!==w || cv.height!==h){
+    cv.width = w; cv.height = h;
+  }
+  cv.style.width = w+'px'; cv.style.height = h+'px';
+  if(!HL_BLEND) cv.style.mixBlendMode = 'normal';
+  redrawHl(panel);
+}
+function fitAllHlCanvas(){ $$('.qpanel').forEach(fitHlCanvas); }
+
+function redrawHl(panel){
+  const cv = hlCanvasOf(panel); if(!cv) return;
+  const no = +panel.dataset.qno;
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  const strokes = state.hlStrokes[no] || [];
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  strokes.forEach(st=>{
+    ctx.globalAlpha = HL_BLEND ? 0.95 : 0.33;
+    ctx.strokeStyle = HL_COLOR;
+    ctx.lineWidth = st.w || HL_WIDTH;
+    const p = st.pts;
+    ctx.beginPath();
+    if(p.length===1){ ctx.moveTo(p[0].x, p[0].y); ctx.lineTo(p[0].x+0.1, p[0].y); }
+    else{
+      ctx.moveTo(p[0].x, p[0].y);
+      for(let i=1;i<p.length-1;i++){
+        const mx = (p[i].x+p[i+1].x)/2, my = (p[i].y+p[i+1].y)/2;
+        ctx.quadraticCurveTo(p[i].x, p[i].y, mx, my);
+      }
+      ctx.lineTo(p[p.length-1].x, p[p.length-1].y);
+    }
+    ctx.stroke();
+  });
+  ctx.globalAlpha = 1;
+}
+
+function hlPos(cv, e){
+  const r = cv.getBoundingClientRect();
+  return { x: Math.round((e.clientX - r.left)*10)/10, y: Math.round((e.clientY - r.top)*10)/10 };
+}
+
+function hlPointerDown(panel, no, e){
+  const cv = hlCanvasOf(panel); if(!cv) return;
+  e.preventDefault();
+  const st = {w: HL_WIDTH, pts:[hlPos(cv, e)]};
+  (state.hlStrokes[no] = state.hlStrokes[no] || []).push(st);
+  hlDraw = {no, panel, st};
+  redrawHl(panel);
+}
+window.addEventListener('pointermove', e=>{
+  if(!hlDraw) return;
+  const cv = hlCanvasOf(hlDraw.panel); if(!cv){ hlDraw=null; return; }
+  const p = hlPos(cv, e);
+  const pts = hlDraw.st.pts, last = pts[pts.length-1];
+  if(Math.abs(p.x-last.x) + Math.abs(p.y-last.y) < 1.5) return;
+  pts.push(p);
+  redrawHl(hlDraw.panel);
+});
+window.addEventListener('pointerup', ()=>{ hlDraw = null; });
+window.addEventListener('pointercancel', ()=>{ hlDraw = null; });
+window.addEventListener('resize', ()=>{ if($('#screen-exam').classList.contains('active')) fitAllHlCanvas(); });
+
+function toggleHl(no){
+  state.hlMode[no] = !state.hlMode[no];
+  // 실제 시험과 동일하게, 형광펜을 끄면 해당 문항의 형광펜 표시가 모두 지워집니다.
+  if(!state.hlMode[no]) state.hlStrokes[no] = [];
+  refreshQuestionPanels(no);
+}
+/* 형광펜 지우기 — 켜짐/꺼짐 상태는 그대로 두고 그 문항의 표시만 모두 삭제 */
+function clearHl(no){
+  state.hlStrokes[no] = [];
+  $$('.qpanel').forEach(p=>{ if(+p.dataset.qno===no) redrawHl(p); });
+}
+
+/* ===================== 답안 표기란(OMR) ===================== */
+function buildOMR(){
+  const omr = $('#omr');
+  omr.innerHTML = '';
+  state.sess.questions.forEach(q=>{
+    const row = document.createElement('div');
+    row.className = 'omr-row'; row.id = 'omr-'+q.no;
+    row.innerHTML = `
+      <button class="chk" title="체크문제로 표시/해제"></button>
+      <span class="qn">${String(q.no).padStart(2,'0')}</span>
+      <span class="omr-bubbles">${CIRC.map((c,i)=>`<button class="bub" data-v="${i+1}">${i+1}</button>`).join('')}</span>`;
+    row.querySelector('.qn').addEventListener('click', ()=>jumpTo(q.no));
+    row.querySelector('.chk').addEventListener('click', ()=>toggleCheck(q.no));   // 네모 체크박스 → 체크문제 표시/해제
+    row.querySelectorAll('.bub').forEach(b=>b.addEventListener('click', ()=>{
+      /* 실제 시험과 동일한 2단계 동작:
+         · 화면에 열려 있지 않은 문항의 동그라미 → 답은 건드리지 않고 그 문제로 이동만
+         · 그 문제가 화면에 열려 있는 상태에서 누르면 → 실제로 답 표기
+         (답안 표기란을 눌러 문제를 다시 볼 때 실수로 답이 바뀌는 것을 막습니다) */
+      if(!isOnScreen(q.no)){ jumpTo(q.no); return; }
+      setAnswer(q.no, +b.dataset.v);
+    }));
+    omr.appendChild(row);
+    refreshOMRRow(q.no);
+  });
+}
+function refreshOMRRow(no){
+  const row = $('#omr-'+no); if(!row) return;
+  const chk = row.querySelector('.chk');
+  chk.textContent = state.checks.has(no) ? '✔' : '';
+  chk.classList.toggle('on', state.checks.has(no));
+  row.querySelectorAll('.bub').forEach(b=>{
+    b.classList.toggle('fill', state.answers[no]===+b.dataset.v);
+  });
+}
+function syncOMRHighlight(){
+  $$('.omr-row').forEach(r=>r.classList.remove('cur'));
+  pageQuestions().forEach(q=>{
+    const row = $('#omr-'+q.no);
+    if(row){ row.classList.add('cur'); }
+  });
+  const first = pageQuestions()[0];
+  if(first){ const row=$('#omr-'+first.no); if(row) row.scrollIntoView({block:'nearest'}); }
+}
+
+/* ===================== 이동 ===================== */
+function movePage(d){
+  const np = state.page + d;
+  if(np<0 || np>=pageCount()) return;
+  state.page = np;
+  renderPage();
+}
+function jumpTo(no){
+  state.page = Math.floor((no-1)/state.layout);
+  renderPage();
+}
+function setLayout(n){
+  const curFirst = pageQuestions()[0];
+  state.layout = n;
+  if(curFirst) state.page = Math.floor((curFirst.no-1)/n);
+  setLayoutButtons();
+  renderPage();
+}
+function setLayoutButtons(){
+  $('#lay1').classList.toggle('on', state.layout===1);
+  $('#lay2').classList.toggle('on', state.layout===2);
+}
+function setFont(f){
+  state.fontScale = f;
+  $$('.fontbtn').forEach(b=>b.classList.toggle('on', +b.dataset.fs===f));
+  $('#qWrap').style.fontSize = f+'em';
+  requestAnimationFrame(fitAllHlCanvas);
+}
+
+/* ===================== 카운트 ===================== */
+function counts(){
+  const total = state.sess.questions.length;
+  const solved = Object.keys(state.answers).length;
+  return { all: total, check: state.checks.size, unsolved: total - solved };
+}
+function updateCounts(){
+  const c = counts();
+  $('#cntAll').textContent = c.all;
+  $('#cntCheck').textContent = c.check;
+  $('#cntUnsolved').textContent = c.unsolved;
+}
+
+/* ===================== 문제 보기 모달 ===================== */
+let viewerCur = 'all';
+function openViewer(tab){
+  viewerCur = tab;
+  $('#viewerModal').classList.add('open');
+  viewerTab(tab);
+}
+function viewerTab(tab){
+  viewerCur = tab;
+  const c = counts();
+  $('#vtAll').textContent = c.all; $('#vtCheck').textContent = c.check; $('#vtUnsolved').textContent = c.unsolved;
+  $$('.vtab').forEach(b=>b.classList.toggle('on', b.dataset.tab===tab));
+  const grid = $('#viewerGrid');
+  grid.innerHTML = '';
+  let list = state.sess.questions;
+  if(tab==='check') list = list.filter(q=>state.checks.has(q.no));
+  if(tab==='unsolved') list = list.filter(q=>!state.answers[q.no]);
+  if(!list.length){
+    grid.innerHTML = `<div class="vempty">해당하는 문제가 없습니다.</div>`;
+    return;
+  }
+  list.forEach(q=>{
+    const card = document.createElement('div');
+    card.className = 'vcard';
+    card.innerHTML = `<div class="vno">${q.no}</div>
+      <div class="vq">${esc(q.q)}</div>
+      ${q.box && q.box.length ? `<div class="qbox" style="font-size:12px;margin:4px 0 8px">${q.box.map(esc).join('\n')}</div>`:''}
+      ${q.options.map((o,i)=>`<div class="vopt${state.answers[q.no]===i+1?' on':''}"><span class="c">${state.answers[q.no]===i+1?'●':CIRC[i]}</span><span>${esc(o)}</span></div>`).join('')}`;
+    const jump = ()=>{ closeModal('viewerModal'); jumpTo(q.no); };
+    card.addEventListener('click', jump);
+    grid.appendChild(card);
+  });
+}
+function closeModal(id){ $('#'+id).classList.remove('open'); }
+
+/* ===================== 계산기 ===================== */
+let calcBuf = '0';
+function toggleCalc(){
+  const el = $('#calcBox');
+  el.style.display = el.style.display==='block' ? 'none' : 'block';
+}
+function calcKey(k){
+  const disp = $('#calcDisp');
+  if(k==='CA'){ calcBuf='0'; }
+  else if(k==='BS'){ calcBuf = calcBuf.length>1 ? calcBuf.slice(0,-1) : '0'; }
+  else if(k==='='){
+    try{
+      if(/^[\d+\-*/.%() ]+$/.test(calcBuf)){
+        const v = Function('"use strict";return ('+calcBuf.replace(/%/g,'/100')+')')();
+        calcBuf = String(Number.isFinite(v) ? Math.round(v*1e10)/1e10 : '오류');
+      }
+    }catch(e){ calcBuf='오류'; }
+  }
+  else{
+    if(calcBuf==='0' && /[\d.]/.test(k)) calcBuf = k;
+    else if(calcBuf==='오류') calcBuf = /[\d.]/.test(k)? k : '0';
+    else calcBuf += k;
+  }
+  disp.value = calcBuf;
+}
+dragify($('#calcBox'), $('#calcHead'));
+
+/* ===================== 그림판 ===================== */
+const pctx = $('#paintCanvas').getContext('2d');
+let paint = {tool:'pen', color:'#222', drawing:false, last:null};
+function openPaint(){ $('#paintModal').classList.add('open'); }
+function paintTool(t){
+  paint.tool = t;
+  $('#ptPen').classList.toggle('on', t==='pen');
+  $('#ptEraser').classList.toggle('on', t==='eraser');
+}
+function paintColor(c, btn){
+  paint.color = c; paintTool('pen');
+  $$('.swatch').forEach(s=>s.classList.remove('on'));
+  btn.classList.add('on');
+}
+function paintClear(){ pctx.clearRect(0,0,1060,560); }
+(function initPaint(){
+  const cv = $('#paintCanvas');
+  const pos = e=>{
+    const r = cv.getBoundingClientRect();
+    const p = e.touches ? e.touches[0] : e;
+    return {x:(p.clientX-r.left)*cv.width/r.width, y:(p.clientY-r.top)*cv.height/r.height};
+  };
+  const down = e=>{ paint.drawing=true; paint.last=pos(e); e.preventDefault(); };
+  const move = e=>{
+    if(!paint.drawing) return;
+    const p = pos(e);
+    pctx.lineCap='round'; pctx.lineJoin='round';
+    pctx.lineWidth = paint.tool==='eraser' ? 26 : +$('#paintWidth').value;
+    pctx.strokeStyle = paint.color;
+    pctx.globalCompositeOperation = paint.tool==='eraser' ? 'destination-out' : 'source-over';
+    pctx.beginPath(); pctx.moveTo(paint.last.x, paint.last.y); pctx.lineTo(p.x,p.y); pctx.stroke();
+    paint.last = p; e.preventDefault();
+  };
+  const up = ()=>{ paint.drawing=false; pctx.globalCompositeOperation='source-over'; };
+  cv.addEventListener('mousedown',down); cv.addEventListener('mousemove',move); window.addEventListener('mouseup',up);
+  cv.addEventListener('touchstart',down,{passive:false}); cv.addEventListener('touchmove',move,{passive:false}); cv.addEventListener('touchend',up);
+})();
+
+/* ===================== 메모 ===================== */
+function openMemo(no){
+  state.memoOpenFor = no;
+  $('#memoTitle').textContent = `메모 — ${no}번 문항`;
+  $('#memoText').value = state.memos[no] || '';
+  $('#memoBox').style.display = 'block';
+}
+function closeMemo(){
+  if(state.memoOpenFor!=null){
+    const t = $('#memoText').value.trim();
+    if(t) state.memos[state.memoOpenFor] = t; else delete state.memos[state.memoOpenFor];
+    refreshQuestionPanels(state.memoOpenFor);
+  }
+  state.memoOpenFor = null;
+  $('#memoBox').style.display = 'none';
+}
+dragify($('#memoBox'), $('#memoHead'));
+
+function dragify(box, handle){
+  let sx,sy,bx,by,drag=false;
+  handle.addEventListener('mousedown', e=>{
+    drag=true; sx=e.clientX; sy=e.clientY;
+    const r=box.getBoundingClientRect(); bx=r.left; by=r.top;
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', e=>{
+    if(!drag) return;
+    box.style.left=(bx+e.clientX-sx)+'px';
+    box.style.top=(by+e.clientY-sy)+'px';
+    box.style.right='auto'; box.style.bottom='auto';
+  });
+  window.addEventListener('mouseup', ()=>drag=false);
+}
+
+/* ===================== 종료/채점 ===================== */
+function askFinish(){
+  const c = counts();
+  $('#confirmBody').innerHTML =
+    `시험을 종료하고 답안을 제출할까요?<br><br>
+     안 푼 문제: <span class="warn-num">${c.unsolved}문항</span> / 전체 ${c.all}문항<br>
+     <span style="font-size:13.5px;color:#666">종료 후에는 답안을 수정할 수 없습니다.</span>`;
+  $('#confirmModal').classList.add('open');
+}
+function keyDigit(sess, no){
+  const key = (EXAM_DATA.sessions[sess].answerKey||'').replace(/[^1-5]/g,'');
+  const d = key[no-1];
+  return d ? +d : null;
+}
+function submitExam(){
+  closeModal('confirmModal');
+  clearInterval(state.timerId);
+  if(state.memoOpenFor!=null) closeMemo();
+  const sess = state.session, S = state.sess;
+  const ansStr = S.questions.map(q=>state.answers[q.no]||0).join('');
+  const payload = {p_exam:EXAM_ID, p_no:state.user.num, p_name:state.user.name, p_session:sess, p_answers:ansStr};
+  state.results[sess] = { when:new Date(), answered:Object.keys(state.answers).length, total:S.questions.length, payload, status:'sending' };
+  renderSubmitted(sess);
+  go('result');
+  trySend(sess);
+}
+async function trySend(sess){
+  const R = state.results[sess];
+  R.status = 'sending'; renderSubmitted(sess);
+  try{ await sendSubmission(R.payload); R.status = 'ok'; R.sentAt = new Date(); }
+  catch(e){ R.status = 'fail'; }
+  renderSubmitted(sess);
+}
+
+/* ===================== 제출 확인 화면 (학생에게 점수·정답은 보이지 않음) ===================== */
+function renderSubmitted(sess){
+  const S = EXAM_DATA.sessions[sess];
+  const R = state.results[sess];
+  $('#resultTop').textContent = `${examTitleText()} — ${S.name} 답안 제출 · ${state.user.name} (${state.user.num})`;
+  const other = sess==='1' ? '2' : '1';
+  const otherDone = state.results[other] && state.results[other].status==='ok';
+  let badge, sub;
+  if(R.status==='ok'){
+    badge = '<div class="verdict-badge pass">✔ 제출 완료</div>';
+    sub = `${S.name} 답안이 정상적으로 제출되었습니다.<br>제출 시각: <b>${fmtDate(R.sentAt)}</b>`;
+  }else if(R.status==='fail'){
+    badge = '<div class="verdict-badge fail">✕ 전송 실패</div>';
+    sub = `답안을 서버로 보내지 못했습니다. 인터넷 연결을 확인한 뒤 아래 <b>다시 전송</b>을 눌러 주세요.<br>
+           <span style="color:#c0392b;font-weight:700">이 창을 닫지 마세요.</span> (답안은 이 컴퓨터에 임시 보관되어 다음에 이 페이지를 열 때 자동으로 다시 전송됩니다)`;
+  }else{
+    badge = '<div class="verdict-badge na">⏳ 제출 중…</div>';
+    sub = '답안을 서버로 보내고 있습니다. 잠시만 기다려 주세요.';
+  }
+  let html = `<div class="verdict-card">
+    <div style="font-size:15px;color:#445;margin-bottom:4px">학번 ${esc(state.user.num)} · ${esc(state.user.name)}</div>
+    ${badge}
+    <div class="verdict-sub">${sub}<br><br>답안 작성: <b>${R.answered} / ${R.total}문항</b>${R.total-R.answered?` (무응답 ${R.total-R.answered}문항)`:''}<br>
+    <span class="mini">점수와 정답은 교수자가 확인한 뒤 안내합니다.</span></div>
+  </div>`;
+  html += `<div class="result-actions">
+    ${R.status==='fail' ? `<button class="primary" onclick="trySend('${sess}')">🔄 다시 전송</button>` : ''}
+    ${R.status==='ok' && !otherDone ? `<button class="primary" onclick="retakeOther('${other}')">${EXAM_DATA.sessions[other].name} 응시하기</button>` : ''}
+    ${R.status==='ok' ? `<button onclick="location.reload()">처음 화면으로</button>` : ''}
+  </div>`;
+  $('#resultInner').innerHTML = html;
+  window.scrollTo(0,0);
+}
+
+function buildFinalVerdict(){
+  const r1 = state.results['1'], r2 = state.results['2'];
+  const s1 = EXAM_DATA.sessions['1'], s2 = EXAM_DATA.sessions['2'];
+  if(!(r1 && r2)){
+    const done = r1 ? s1.name : (r2 ? s2.name : null);
+    return `<div class="verdict-card">
+      <div class="verdict-badge na">교시 응시 완료</div>
+      <div class="verdict-sub">최종 합격 판정은 <b>1교시·2교시를 모두 응시</b>하면 표시됩니다.<br>
+      합격 기준: <b>전 과목 총점의 60% 이상</b> 득점 + <b>모든 과목 40% 이상</b> (과목 과락 없음)</div>
+    </div>`;
+  }
+  const allSubj = [...r1.perSubj, ...r2.perSubj];
+  const fullyKeyed = (r1.keyedTotal===r1.total) && (r2.keyedTotal===r2.total);
+  if(!fullyKeyed){
+    return `<div class="verdict-card">
+      <div class="verdict-badge na">판정 보류</div>
+      <div class="verdict-sub">정답표가 모두 입력되면 1·2교시 합산 합격 판정이 표시됩니다.</div>
+    </div>`;
+  }
+  const total = r1.total + r2.total;
+  const correct = r1.correctTotal + r2.correctTotal;
+  const totalPct = correct/total*100;
+  const gwarak = allSubj.filter(p=>p.correct/p.n*100 < 40);
+  const pass = totalPct>=60 && gwarak.length===0;
+  return `<div class="verdict-card">
+    <div style="font-size:15px;color:#445;margin-bottom:4px">1·2교시 합산 결과</div>
+    <div class="verdict-badge ${pass?'pass':'fail'}">${pass?'합격':'불합격'}</div>
+    <div class="verdict-sub">
+      총점: <b>${correct} / ${total}</b> (${Math.round(totalPct*10)/10}%) — 기준 60% ${totalPct>=60?'충족':'미달'}<br>
+      ${gwarak.length ? `과락 과목: <span class="tag-fail">${gwarak.map(g=>g.name).join(', ')}</span> (40% 미만)` : '전 과목 40% 이상 — 과락 없음'}
+    </div>
+  </div>`;
+}
+
+function retakeOther(other){
+  $('#selSession').value = other;
+  updateSessionInfo();
+  go('login');
+}
+
+/* ===================== 정답 리뷰 ===================== */
+function renderReview(sess, mode){
+  const S = EXAM_DATA.sessions[sess];
+  const R = state.results[sess];
+  const area = $('#reviewArea');
+  let html = `<div class="review-filter">
+    <button class="${mode==='wrong'?'on':''}" onclick="renderReview('${sess}','wrong')">틀린 문제만</button>
+    <button class="${mode==='all'?'on':''}" onclick="renderReview('${sess}','all')">전체 문제</button>
+  </div>`;
+  S.questions.forEach(q=>{
+    const mine = R.answers[q.no] || null;
+    const key = keyDigit(sess, q.no);
+    const status = key==null ? 'nokey' : (mine===key ? 'right' : 'wrong');
+    if(mode==='wrong' && status==='right') return;
+    const sub = S.subjects.find(s=>q.no>=s.from&&q.no<=s.to);
+    html += `<div class="rcard ${status}">
+      <div class="rsub">${sub.name}</div>
+      <div class="rq">${q.no}. ${esc(q.q)}</div>
+      ${q.box && q.box.length ? `<div class="qbox" style="font-size:13.5px">${q.box.map(esc).join('\n')}</div>`:''}
+      ${q.options.map((o,i)=>{
+        const v=i+1;
+        const cls = ['ropt', v===key?'ans':'', (mine===v)?('mine'+(key!=null&&v!==key?' bad':'')):''].join(' ');
+        return `<div class="${cls}"><span>${mine===v?'●':CIRC[i]}</span><span>${esc(o)}</span>${v===key?'<span style="margin-left:auto;color:#155a8a;font-weight:800">정답</span>':''}${mine===v&&key!=null&&v!==key?'<span style="margin-left:auto;color:#c0392b;font-weight:800">내 답</span>':''}</div>`;
+      }).join('')}
+      <div class="rmeta">${
+        key==null ? '<b class="no-ans">정답 미입력 문항 (채점 제외)</b>'
+        : `내 답: <b>${mine?CIRC[mine-1]:'무응답'}</b> · 정답: <b>${CIRC[key-1]}</b> — ${mine===key?'<span class="tag-ok">정답</span>':'<span class="tag-fail">오답</span>'}`
+      }</div>
+    </div>`;
+  });
+  area.innerHTML = html;
+  area.scrollIntoView({behavior:'smooth'});
+}
+
+/* =====================================================================
+   응시 결과 저장 · 성적 기록 · 오답노트
+   · 브라우저의 localStorage에 기록을 남겨 파일을 닫아도 결과가 유지됩니다.
+   · 저장이 막힌 환경(일부 브라우저의 로컬 파일 실행 등)에서는 현재 창에서만
+     유지되므로 'JSON 내보내기'로 백업 파일을 만들어 두는 것을 권합니다.
+   ===================================================================== */
+const STORE_KEY = 'kcbt_records_v1';
+let memStore = [];
+let storageOK = true;
+let recPerson = 'ALL';
+let recBackTo = 'intro';
+let recOpenDetail = null;
+
+function loadRecords(){
+  if(storageOK){
+    try{
+      const raw = localStorage.getItem(STORE_KEY);
+      const list = raw ? JSON.parse(raw) : [];
+      return Array.isArray(list) ? list : [];
+    }catch(e){ storageOK = false; }
+  }
+  return memStore;
+}
+function writeRecords(list){
+  memStore = list;
+  if(storageOK){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(list)); return true; }
+    catch(e){ storageOK = false; }
+  }
+  return false;
+}
+function saveCurrentRecord(sess, R){
+  const S = EXAM_DATA.sessions[sess];
+  const wrongs = [];
+  S.questions.forEach(q=>{
+    const key = keyDigit(sess, q.no);
+    if(key==null) return;
+    const mine = R.answers[q.no] || null;
+    if(mine!==key){
+      const sub = S.subjects.find(x=>q.no>=x.from && q.no<=x.to);
+      wrongs.push({no:q.no, subj: sub?sub.name:'', mine, key, qtext:(q.q||'').slice(0,140)});
+    }
+  });
+  const rec = {
+    id: 'r' + Date.now() + Math.random().toString(36).slice(2,6),
+    ts: new Date().toISOString(),
+    examTitle: EXAM_DATA.examTitle, round: EXAM_DATA.round,
+    session: sess, sessionName: S.name,
+    name: state.user.name, birth: state.user.birth, num: state.user.num,
+    total: R.total, answered: Object.keys(R.answers).length,
+    keyedTotal: R.keyedTotal, correctTotal: R.correctTotal,
+    durationSec: Math.max(0, S.minutes*60 - state.remainSec),
+    perSubj: R.perSubj.map(p=>({name:p.name, n:p.n, keyed:p.keyed, correct:p.correct})),
+    wrongs, answers: {...R.answers}
+  };
+  const list = loadRecords();
+  list.push(rec);
+  return writeRecords(list);
+}
+
+/* ---------- 화면 전환 ---------- */
+function openRecords(from){
+  recBackTo = from || 'intro';
+  recOpenDetail = null;
+  renderRecords();
+  go('records');
+}
+function closeRecords(){
+  if(recBackTo==='result' && (state.results['1']||state.results['2'])) go('result');
+  else go('intro');
+}
+
+/* ---------- 집계 ---------- */
+function personKey(r){ return (r.name||'?') + '|' + (r.birth||''); }
+function filteredRecords(){
+  const list = loadRecords().slice().sort((a,b)=> new Date(a.ts)-new Date(b.ts));
+  if(recPerson==='ALL') return list;
+  return list.filter(r=>personKey(r)===recPerson);
+}
+function pct(c, n){ return n ? Math.round(c/n*1000)/10 : null; }
+function gradeTag(p){
+  if(p==null) return '<span class="grade g-mid">채점 불가</span>';
+  if(p < 40) return '<span class="grade g-bad">과락 위험</span>';
+  if(p < 60) return '<span class="grade g-mid">취약</span>';
+  return '<span class="grade g-ok">양호</span>';
+}
+function barColor(p){
+  if(p==null) return '#b9c2cf';
+  if(p < 40) return '#c0392b';
+  if(p < 60) return '#e0a32e';
+  return '#1c7c3c';
+}
+function fmtDate(ts){
+  const d = new Date(ts);
+  const p = n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function fmtDur(sec){
+  const m = Math.floor(sec/60), s2 = sec%60;
+  return `${m}분 ${String(s2).padStart(2,'0')}초`;
+}
+function findQuestion(rec, no){
+  if(rec.round !== EXAM_DATA.round) return null;
+  const S = EXAM_DATA.sessions[rec.session];
+  if(!S) return null;
+  return S.questions[no-1] || null;
+}
+
+/* ---------- 대시보드 렌더 ---------- */
+function renderRecords(){
+  const all = loadRecords();
+  const list = filteredRecords();
+  const inner = $('#recInner');
+
+  // 응시자 선택 목록
+  const persons = [...new Set(all.map(personKey))];
+  let html = '';
+
+  if(!storageOK){
+    html += `<div class="store-warn">⚠ 이 브라우저에서 자동 저장(localStorage)이 차단되어 있습니다.
+      기록이 <b>현재 창에서만</b> 유지되므로, 창을 닫기 전에 아래 <b>JSON 내보내기</b>로 백업 파일을 만들어 두세요.
+      다음 응시 때 <b>JSON 불러오기</b>로 그대로 이어서 볼 수 있습니다.</div>`;
+  }
+
+  html += `<div class="rec-filter">
+    <b style="font-size:14.5px;color:#24395a">응시자</b>
+    <select class="rec-sel" id="recPersonSel" onchange="recPerson=this.value; recOpenDetail=null; renderRecords();">
+      <option value="ALL"${recPerson==='ALL'?' selected':''}>전체 (${all.length}건)</option>
+      ${persons.map(k=>{
+        const [nm,bd] = k.split('|');
+        const cnt = all.filter(r=>personKey(r)===k).length;
+        return `<option value="${k}"${recPerson===k?' selected':''}>${nm} (${bd}) — ${cnt}건</option>`;
+      }).join('')}
+    </select>
+    <span class="mini">생년월일 6자리로 응시자를 구분합니다.</span>
+  </div>`;
+
+  html += `<div class="rec-actions">
+    <button class="primary" onclick="exportRecords()">💾 JSON 내보내기(백업)</button>
+    <button onclick="$('#recImportFile').click()">📂 JSON 불러오기</button>
+    <button onclick="exportWrongCSV()">📄 오답노트 CSV 내보내기</button>
+    <button class="danger" onclick="clearAllRecords()">🗑 기록 전체 삭제</button>
+  </div>`;
+
+  if(!list.length){
+    html += `<div class="rec-card"><div class="rec-empty">아직 저장된 응시 기록이 없습니다.<br>
+      모의고사를 끝까지 응시하고 <b>시험 종료 → 채점</b>을 하면 이 화면에 자동으로 쌓입니다.</div></div>`;
+    inner.innerHTML = html;
+    return;
+  }
+
+  const keyedSum = list.reduce((a,r)=>a+r.keyedTotal, 0);
+
+  // 요약 지표
+  const scored = list.filter(r=>r.keyedTotal>0);
+  const pcts = scored.map(r=>r.correctTotal/r.keyedTotal*100);
+  const avg = pcts.length ? Math.round(pcts.reduce((a,b)=>a+b,0)/pcts.length*10)/10 : null;
+  const best = pcts.length ? Math.round(Math.max(...pcts)*10)/10 : null;
+  const lastR = list[list.length-1];
+  html += `<div class="rec-card"><h4>📌 요약</h4><div class="kpi">
+    <div><b>${list.length}</b><small>응시 횟수</small></div>
+    <div><b>${avg!=null?avg+'%':'—'}</b><small>평균 정답률</small></div>
+    <div><b>${best!=null?best+'%':'—'}</b><small>최고 정답률</small></div>
+    <div><b>${list.reduce((a,r)=>a+r.wrongs.length,0)}</b><small>누적 오답(무응답 포함)</small></div>
+    <div><b>${fmtDate(lastR.ts).slice(0,10)}</b><small>최근 응시일</small></div>
+  </div>`;
+  if(!keyedSum){
+    html += `<div class="notice-banner" style="margin:14px 0 0">⚠ 정답표(answerKey)가 입력되지 않아 <b>정답률·취약 과목·오답노트는 계산되지 않습니다</b>.
+      파일 상단 <b>EXAM_DATA</b>의 각 교시 <b>answerKey</b>에 정답을 순서대로 붙여 쓰면(예: 80문항 → 80자리 숫자) 이후 응시분부터 자동으로 분석됩니다.</div>`;
+  }
+  html += `</div>`;
+
+  // 과목별 취약도
+  const bySubj = {};
+  list.forEach(r=>r.perSubj.forEach(p=>{
+    const o = bySubj[p.name] = bySubj[p.name] || {keyed:0, correct:0, n:0, times:0};
+    o.keyed += p.keyed; o.correct += p.correct; o.n += p.n; o.times++;
+  }));
+  const subjRows = Object.entries(bySubj).map(([name,o])=>({name, ...o, p: pct(o.correct, o.keyed)}))
+    .sort((a,b)=>{
+      if(a.p==null && b.p==null) return 0;
+      if(a.p==null) return 1;
+      if(b.p==null) return -1;
+      return a.p - b.p;
+    });
+  html += `<div class="rec-card"><h4>🧭 과목별 취약도 <small>정답률이 낮은 과목부터 표시 · 40% 미만은 실제 시험에서 과락</small></h4>`;
+  subjRows.forEach(r=>{
+    html += `<div class="bar-row">
+      <span class="lb">${r.name}</span>
+      <span class="bar-track"><span class="bar-fill" style="width:${r.p!=null?r.p:0}%;background:${barColor(r.p)}"></span></span>
+      <span class="vl">${r.p!=null?`${r.p}% (${r.correct}/${r.keyed})`:'채점 대기'}${gradeTag(r.p)}</span>
+    </div>`;
+  });
+  html += `<div class="mini" style="margin-top:8px">※ 같은 과목을 여러 번 응시한 경우 모든 회차를 합산한 누적 정답률입니다.</div></div>`;
+
+  // 회차별 추이
+  html += `<div class="rec-card"><h4>📈 응시 추이 <small>최근 12회</small></h4>`;
+  list.slice(-12).forEach(r=>{
+    const p = pct(r.correctTotal, r.keyedTotal);
+    html += `<div class="bar-row">
+      <span class="lb" style="width:150px;font-weight:400;font-size:12.5px">${fmtDate(r.ts)}<br><b>${r.sessionName}</b></span>
+      <span class="bar-track"><span class="bar-fill" style="width:${p!=null?p:0}%;background:${barColor(p)}"></span></span>
+      <span class="vl">${p!=null?`${p}% (${r.correctTotal}/${r.keyedTotal})`:'채점 대기'}</span>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // 반복 오답 문항
+  const freq = {};
+  list.forEach(r=>r.wrongs.forEach(w=>{
+    const k = `${r.round}|${r.session}|${w.no}`;
+    const o = freq[k] = freq[k] || {count:0, ...w, round:r.round, session:r.session, sessionName:r.sessionName, mines:[]};
+    o.count++; o.mines.push(w.mine);
+  }));
+  const freqRows = Object.values(freq).sort((a,b)=> b.count-a.count || a.no-b.no);
+  html += `<div class="rec-card"><h4>🔁 자주 틀리는 문항 <small>2회 이상 틀린 문항 우선 · 최대 25개</small></h4>`;
+  if(!freqRows.length){
+    html += `<div class="rec-empty">표시할 오답이 없습니다.${keyedSum?' 정답표가 입력된 문항에서 모두 정답이었습니다.':' (정답표 입력 후 집계됩니다)'}</div>`;
+  }else{
+    freqRows.slice(0,25).forEach(w=>{
+      const q = findQuestion(w, w.no);
+      html += `<div class="wrong-item">
+        <div class="wq"><span class="freq-badge">${w.count}회 오답</span>[${w.sessionName} · ${w.subj}] ${w.no}. ${esc(w.qtext)}</div>
+        <div class="wmeta">내가 고른 답: <b>${w.mines.map(m=>m?CIRC[m-1]:'무응답').join(', ')}</b> · 정답: <b style="color:#155a8a">${CIRC[w.key-1]}</b>${
+          q ? ` — ${esc(q.options[w.key-1]||'')}` : ''
+        }</div>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+
+  // 응시 기록 목록
+  html += `<div class="rec-card"><h4>🗂 응시 기록</h4>
+    <table class="rec-tb"><tr>
+      <th>응시일시</th><th>응시자</th><th>교시</th><th>답안 작성</th><th>정답률</th><th>소요시간</th><th>오답</th><th></th>
+    </tr>`;
+  list.slice().reverse().forEach(r=>{
+    const p = pct(r.correctTotal, r.keyedTotal);
+    html += `<tr>
+      <td>${fmtDate(r.ts)}</td>
+      <td>${esc(r.name)}<br><span class="mini">${r.birth}</span></td>
+      <td>${r.sessionName}</td>
+      <td>${r.answered}/${r.total}</td>
+      <td>${p!=null?`<b>${p}%</b><br><span class="mini">${r.correctTotal}/${r.keyedTotal}</span>`:'—'}</td>
+      <td>${fmtDur(r.durationSec)}</td>
+      <td>${r.wrongs.length}</td>
+      <td><button class="rec-btn" onclick="toggleRecDetail('${r.id}')">오답 보기</button>
+          <button class="rec-btn del" onclick="deleteRecord('${r.id}')">삭제</button></td>
+    </tr>`;
+    if(recOpenDetail===r.id){
+      html += `<tr><td colspan="8" class="l"><div class="detail-box">${recDetailHtml(r)}</div></td></tr>`;
+    }
+  });
+  html += `</table></div>`;
+
+  inner.innerHTML = html;
+  $('#screen-records .rec-scroll').scrollTop = 0;
+}
+
+function recDetailHtml(r){
+  if(!r.wrongs.length) return `<div class="mini">이 회차에는 기록된 오답이 없습니다. (정답표 미입력 시에도 오답이 표시되지 않습니다)</div>`;
+  let h = `<div style="font-weight:700;margin-bottom:6px">${fmtDate(r.ts)} · ${r.sessionName} 오답 ${r.wrongs.length}문항</div>`;
+  r.wrongs.forEach(w=>{
+    const q = findQuestion(r, w.no);
+    h += `<div class="wrong-item">
+      <div class="wq">[${w.subj}] ${w.no}. ${esc(w.qtext)}</div>
+      ${q ? `<div class="mini" style="margin:4px 0">${q.options.map((o,i)=>{
+          const v=i+1;
+          const mark = v===w.key ? ' ← 정답' : (v===w.mine ? ' ← 내 답' : '');
+          const col = v===w.key ? 'color:#155a8a;font-weight:700' : (v===w.mine ? 'color:#c0392b;font-weight:700' : '');
+          return `<div style="${col}">${CIRC[i]} ${esc(o)}${mark}</div>`;
+        }).join('')}</div>`
+        : `<div class="wmeta">내 답: <b>${w.mine?CIRC[w.mine-1]:'무응답'}</b> · 정답: <b>${CIRC[w.key-1]}</b></div>`}
+    </div>`;
+  });
+  return h;
+}
+function toggleRecDetail(id){
+  recOpenDetail = (recOpenDetail===id) ? null : id;
+  renderRecords();
+}
+function deleteRecord(id){
+  if(!confirm('이 응시 기록을 삭제할까요? 되돌릴 수 없습니다.')) return;
+  writeRecords(loadRecords().filter(r=>r.id!==id));
+  recOpenDetail = null;
+  renderRecords();
+}
+function clearAllRecords(){
+  if(!confirm('저장된 모든 응시 기록을 삭제할까요?\n먼저 JSON 내보내기로 백업하는 것을 권합니다.')) return;
+  if(!confirm('한 번 더 확인합니다. 모든 기록을 정말 삭제하시겠습니까?')) return;
+  writeRecords([]);
+  recPerson = 'ALL'; recOpenDetail = null;
+  renderRecords();
+}
+
+/* ---------- 내보내기 / 불러오기 ---------- */
+function downloadBlob(text, filename, mime){
+  const blob = new Blob([text], {type: mime||'application/octet-stream'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1500);
+}
+function stamp(){
+  const d = new Date(), p = n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`;
+}
+function exportRecords(){
+  const list = loadRecords();
+  if(!list.length){ alert('내보낼 기록이 없습니다.'); return; }
+  downloadBlob(JSON.stringify({app:'kcbt', version:1, exportedAt:new Date().toISOString(), records:list}, null, 2),
+    `언어재활사_모의고사_기록_${stamp()}.json`, 'application/json');
+}
+function importRecords(input){
+  const f = input.files && input.files[0];
+  if(!f) return;
+  const fr = new FileReader();
+  fr.onload = ()=>{
+    try{
+      const data = JSON.parse(fr.result);
+      const incoming = Array.isArray(data) ? data : (data.records||[]);
+      if(!Array.isArray(incoming) || !incoming.length) throw new Error('형식 오류');
+      const cur = loadRecords();
+      const ids = new Set(cur.map(r=>r.id));
+      let added = 0;
+      incoming.forEach(r=>{
+        if(r && r.id && !ids.has(r.id)){ cur.push(r); ids.add(r.id); added++; }
+      });
+      cur.sort((a,b)=> new Date(a.ts)-new Date(b.ts));
+      writeRecords(cur);
+      alert(`${added}건의 기록을 불러왔습니다. (중복 ${incoming.length-added}건 제외)`);
+      renderRecords();
+    }catch(e){
+      alert('파일을 읽을 수 없습니다. 이 프로그램에서 내보낸 JSON 파일인지 확인해 주세요.');
+    }
+    input.value = '';
+  };
+  fr.readAsText(f, 'utf-8');
+}
+function exportWrongCSV(){
+  const list = filteredRecords();
+  const rows = [['응시일시','응시자','생년월일','응시번호','교시','과목','문항번호','내 답','정답','문항 내용']];
+  list.forEach(r=>r.wrongs.forEach(w=>{
+    rows.push([fmtDate(r.ts), r.name, r.birth, r.num, r.sessionName, w.subj, w.no,
+      w.mine ? w.mine : '무응답', w.key, (w.qtext||'').replace(/\s+/g,' ')]);
+  }));
+  if(rows.length===1){ alert('내보낼 오답 기록이 없습니다. (정답표가 입력된 회차만 집계됩니다)'); return; }
+  const csv = '\ufeff' + rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  downloadBlob(csv, `오답노트_${stamp()}.csv`, 'text/csv;charset=utf-8');
+}
+
+/* ===================== ESC로 모달 닫기 ===================== */
+window.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){ ['viewerModal','paintModal','confirmModal','tpwModal'].forEach(closeModal); }
+});
+window.addEventListener('beforeunload', e=>{
+  if($('#screen-exam').classList.contains('active')){ e.preventDefault(); e.returnValue=''; }
+});
+
+/* =====================================================================
+   ▣ 서버(Supabase) 연결 — 답안 제출 · 교사용 대시보드
+   · 정답표는 이 파일에 들어 있지 않고 서버에만 저장되어 있습니다.
+   · 채점은 서버에서 하며, 결과는 교사 비밀번호로만 열람할 수 있습니다.
+   ===================================================================== */
+const SB_URL  = 'https://qyhdfrzdojfzefghjtyx.supabase.co';
+const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5aGRmcnpkb2pmemVmZ2hqdHl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4ODM2MTgsImV4cCI6MjEwNjQ1OTYxOH0.QOtKhOeMvgnhuQB4-7mHZqabYiSlFNDL6dbLTk3HHAA';
+const EXAM_ID = 'grad-exam-2026';
+const PENDING_KEY = 'gexam_pending_v1';
+
+async function api(fn, body, timeoutMs){
+  const ctl = new AbortController();
+  const t = setTimeout(()=>ctl.abort(), timeoutMs||15000);
+  try{
+    const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json', apikey:SB_KEY, Authorization:'Bearer '+SB_KEY},
+      body: JSON.stringify(body), signal: ctl.signal
+    });
+    const txt = await r.text();
+    let data = null; try{ data = JSON.parse(txt); }catch(e){}
+    if(!r.ok){
+      const err = new Error((data && (data.message||data.hint)) || txt || ('HTTP '+r.status));
+      err.status = r.status; throw err;
+    }
+    return data;
+  }finally{ clearTimeout(t); }
+}
+
+/* ---------- 제출 대기열 (전송 실패 시 보관했다가 다시 보냄) ---------- */
+function loadPending(){ try{ return JSON.parse(localStorage.getItem(PENDING_KEY)||'[]'); }catch(e){ return []; } }
+function savePending(list){ try{ localStorage.setItem(PENDING_KEY, JSON.stringify(list)); }catch(e){} }
+function addPending(p){
+  const list = loadPending().filter(x=>!(x.p_no===p.p_no && x.p_session===p.p_session));
+  list.push(p); savePending(list);
+}
+function removePending(p){
+  savePending(loadPending().filter(x=>!(x.p_no===p.p_no && x.p_session===p.p_session)));
+}
+async function sendSubmission(p){
+  addPending(p);
+  await api('gexam_submit', p, 20000);
+  removePending(p);
+  return true;
+}
+async function flushPending(){
+  for(const p of loadPending()){
+    try{ await api('gexam_submit', p, 20000); removePending(p); }catch(e){}
+  }
+}
+
+/* =====================================================================
+   교사용 대시보드
+   ===================================================================== */
+const T = { pw:null, data:null, client:null, chan:null, poll:null, timer:null,
+            tab:'students', sort:'no', open:null, itemSess:'1', itemSort:'no', live:'연결 중…', lastAt:null };
+
+function openTeacherLogin(){
+  $('#tpwInput').value = '';
+  $('#tpwMsg').textContent = '';
+  $('#tpwModal').classList.add('open');
+  setTimeout(()=>$('#tpwInput').focus(), 50);
+}
+async function teacherLogin(){
+  const pw = $('#tpwInput').value;
+  if(!pw){ $('#tpwMsg').textContent = '비밀번호를 입력해 주세요.'; return; }
+  $('#tpwMsg').textContent = '확인 중…';
+  try{
+    T.data = await api('gexam_teacher', {p_exam:EXAM_ID, p_pw:pw});
+    T.pw = pw; T.lastAt = new Date();
+    closeModal('tpwModal');
+    go('teacher');
+    renderTeacher();
+    startLive();
+  }catch(e){
+    $('#tpwMsg').textContent = /wrong password/.test(e.message) ? '비밀번호가 올바르지 않습니다.' : '서버에 연결할 수 없습니다. 인터넷 연결을 확인해 주세요.';
+  }
+}
+function teacherLock(){
+  stopLive();
+  T.pw = null; T.data = null; T.open = null;
+  $('#teacherInner').innerHTML = '';
+  go('intro');
+}
+async function teacherRefresh(){
+  if(!T.pw) return;
+  try{
+    T.data = await api('gexam_teacher', {p_exam:EXAM_ID, p_pw:T.pw});
+    T.lastAt = new Date();
+    renderTeacher();
+  }catch(e){
+    T.live = '⚠ 갱신 실패 — 다시 시도 중';
+    renderLiveLine();
+  }
+}
+function scheduleRefresh(){
+  clearTimeout(T.timer);
+  T.timer = setTimeout(teacherRefresh, 700);
+}
+
+/* 실시간: 제출/시작이 생기면 서버가 알림 → 즉시 갱신. 실패해도 20초마다 자동 갱신 */
+function startLive(){
+  stopLive();
+  T.poll = setInterval(teacherRefresh, 20000);
+  const attach = ()=>{
+    try{
+      T.client = window.supabase.createClient(SB_URL, SB_KEY);
+      T.chan = T.client.channel('gexam-'+EXAM_ID)
+        .on('postgres_changes', {event:'INSERT', schema:'public', table:'gexam_events', filter:'exam_id=eq.'+EXAM_ID}, scheduleRefresh)
+        .subscribe(st=>{
+          T.live = st==='SUBSCRIBED' ? '● 실시간 연결됨' : (st==='CLOSED' ? '○ 연결 끊김 — 20초마다 자동 갱신' : '○ 연결 중…');
+          renderLiveLine();
+        });
+    }catch(e){ T.live = '○ 실시간 연결 불가 — 20초마다 자동 갱신'; renderLiveLine(); }
+  };
+  if(window.supabase && window.supabase.createClient) attach();
+  else{
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+    s.onload = attach;
+    s.onerror = ()=>{ T.live = '○ 실시간 연결 불가 — 20초마다 자동 갱신'; renderLiveLine(); };
+    document.head.appendChild(s);
+  }
+}
+function stopLive(){
+  clearInterval(T.poll); T.poll = null;
+  clearTimeout(T.timer);
+  try{ if(T.client && T.chan) T.client.removeChannel(T.chan); }catch(e){}
+  T.chan = null;
+}
+function renderLiveLine(){
+  const el = $('#tLive'); if(!el) return;
+  el.textContent = `${T.live}${T.lastAt ? ' · 마지막 갱신 '+fmtDate(T.lastAt).slice(11)+':'+String(T.lastAt.getSeconds()).padStart(2,'0') : ''}`;
+}
+
+/* ---------- 집계 ---------- */
+function tStudents(){
+  const D = T.data; const map = {};
+  (D.attempts||[]).forEach(a=>{
+    const o = map[a.student_no] = map[a.student_no] || {no:a.student_no, name:a.student_name, s:{}};
+    o.name = a.student_name;
+    o.s[a.session] = a;
+  });
+  const subjAll = ['1','2'].flatMap(k=>(D.subjects[k]||[]).map(s=>({...s, sess:k})));
+  const totalN = ['1','2'].reduce((n,k)=>n+(D.answer_keys[k]||'').length, 0);
+  return Object.values(map).map(o=>{
+    const done1 = o.s['1'] && o.s['1'].status==='submitted';
+    const done2 = o.s['2'] && o.s['2'].status==='submitted';
+    const subj = subjAll.map(sb=>{
+      const a = o.s[sb.sess];
+      if(!a || a.status!=='submitted') return {name:sb.name, n:sb.to-sb.from+1, correct:null};
+      const f = (a.subject_scores||[]).find(x=>x.name===sb.name);
+      return {name:sb.name, n:sb.to-sb.from+1, correct: f ? f.correct : null};
+    });
+    const both = done1 && done2;
+    const total = both ? (o.s['1'].correct + o.s['2'].correct) : null;
+    const gwarak = subj.filter(x=>x.correct!=null && x.correct/x.n*100 < 40).map(x=>x.name);
+    const pass = both ? (total/totalN*100 >= 60 && gwarak.length===0) : null;
+    return {...o, done1, done2, subj, total, totalN, gwarak, pass};
+  });
+}
+function durText(a){
+  if(!a || !a.submitted_at || !a.started_at) return '';
+  const sec = Math.max(0, Math.round((new Date(a.submitted_at)-new Date(a.started_at))/1000));
+  return fmtDur(sec);
+}
+function sessCell(a, n){
+  if(!a) return '<span class="mini">미응시</span>';
+  if(a.status!=='submitted') return '<b class="t-ing">응시 중</b>';
+  return `<b>${a.correct}</b> / ${n}${a.attempts>1?`<br><span class="mini">제출 ${a.attempts}회</span>`:''}`;
+}
+
+/* ---------- 렌더 ---------- */
+function renderTeacher(){
+  const D = T.data; if(!D) return;
+  const st = tStudents();
+  const n1 = (D.answer_keys['1']||'').length, n2 = (D.answer_keys['2']||'').length;
+  const c1 = st.filter(x=>x.done1).length, c2 = st.filter(x=>x.done2).length;
+  const ing1 = st.filter(x=>x.s['1'] && !x.done1).length, ing2 = st.filter(x=>x.s['2'] && !x.done2).length;
+  const both = st.filter(x=>x.total!=null);
+  const avg = both.length ? Math.round(both.reduce((a,b)=>a+b.total,0)/both.length*10)/10 : null;
+  const passN = both.filter(x=>x.pass).length;
+
+  let h = `<div class="rec-filter" style="justify-content:space-between">
+      <span id="tLive" class="t-live"></span>
+      <span style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="rec-btn" onclick="teacherRefresh()">🔄 새로고침</button>
+        <button class="rec-btn" onclick="exportTeacherCSV()">📄 결과 CSV</button>
+        <button class="rec-btn del" onclick="teacherDelete(null)">🗑 전체 기록 삭제</button>
+      </span>
+    </div>
+    <div class="rec-card"><h4>📌 현황 <small>${esc(D.title)}</small></h4><div class="kpi">
+      <div><b>${st.length}</b><small>응시자(명)</small></div>
+      <div><b>${c1}</b><small>1교시 제출${ing1?` · 응시 중 ${ing1}`:''}</small></div>
+      <div><b>${c2}</b><small>2교시 제출${ing2?` · 응시 중 ${ing2}`:''}</small></div>
+      <div><b>${avg!=null?avg:'—'}</b><small>평균 총점 (/${n1+n2})</small></div>
+      <div><b>${both.length?`${passN}/${both.length}`:'—'}</b><small>합격 기준 충족</small></div>
+    </div>
+    <div class="mini" style="margin-top:10px">합격 기준: 총점 60% 이상(${Math.ceil((n1+n2)*0.6)}점) + 모든 과목 40% 이상 · 총점·판정은 1·2교시를 모두 제출한 학생만 표시</div></div>
+    <div class="t-tabs">
+      <button class="${T.tab==='students'?'on':''}" onclick="T.tab='students';renderTeacher()">학생별 결과</button>
+      <button class="${T.tab==='items'?'on':''}" onclick="T.tab='items';renderTeacher()">문항 분석</button>
+      <button class="${T.tab==='key'?'on':''}" onclick="T.tab='key';renderTeacher()">정답표</button>
+    </div>`;
+
+  if(T.tab==='students') h += renderTStudents(st, n1, n2);
+  else if(T.tab==='items') h += renderTItems();
+  else h += renderTKey();
+
+  $('#teacherInner').innerHTML = h;
+  renderLiveLine();
+}
+
+function renderTStudents(st, n1, n2){
+  const D = T.data;
+  if(!st.length) return `<div class="rec-card"><div class="rec-empty">아직 응시한 학생이 없습니다.<br>학생이 로그인하면 이 화면에 바로 나타납니다.</div></div>`;
+  const list = st.slice().sort((a,b)=>{
+    if(T.sort==='total') return (b.total??-1)-(a.total??-1) || a.no.localeCompare(b.no);
+    return a.no.localeCompare(b.no);
+  });
+  const subjNames = list[0].subj.map(s=>s.name);
+  let h = `<div class="rec-card"><h4>🗂 학생별 결과
+      <small style="margin-left:auto">정렬
+        <select class="rec-sel" style="padding:4px 6px;font-size:12.5px" onchange="T.sort=this.value;renderTeacher()">
+          <option value="no"${T.sort==='no'?' selected':''}>학번순</option>
+          <option value="total"${T.sort==='total'?' selected':''}>총점 높은 순</option>
+        </select></small></h4>
+    <div style="overflow-x:auto"><table class="rec-tb"><tr>
+      <th>학번</th><th>성명</th><th>1교시<br><span class="mini">/${n1}</span></th><th>2교시<br><span class="mini">/${n2}</span></th>
+      ${subjNames.map(s=>`<th>${s}</th>`).join('')}
+      <th>총점<br><span class="mini">/${n1+n2}</span></th><th>판정</th><th></th></tr>`;
+  list.forEach(x=>{
+    h += `<tr>
+      <td>${esc(x.no)}</td><td>${esc(x.name)}</td>
+      <td>${sessCell(x.s['1'], n1)}</td><td>${sessCell(x.s['2'], n2)}</td>
+      ${x.subj.map(s=>{
+        if(s.correct==null) return '<td><span class="mini">—</span></td>';
+        const low = s.correct/s.n*100 < 40;
+        return `<td>${s.correct}/${s.n}${low?'<br><span class="t-bad">▼과락</span>':''}</td>`;
+      }).join('')}
+      <td>${x.total!=null?`<b>${x.total}</b>`:'<span class="mini">—</span>'}</td>
+      <td>${x.pass==null?'<span class="mini">대기</span>':(x.pass?'<span class="t-ok">○ 합격</span>':'<span class="t-bad">✕ 불합격</span>')}</td>
+      <td><button class="rec-btn" onclick="T.open=(T.open===${JSON.stringify(x.no)}?null:${JSON.stringify(x.no)});renderTeacher()">${T.open===x.no?'접기':'상세'}</button></td>
+    </tr>`;
+    if(T.open===x.no) h += `<tr><td colspan="${7+subjNames.length}" class="l"><div class="detail-box">${tStudentDetail(x)}</div></td></tr>`;
+  });
+  h += `</table></div></div>`;
+  return h;
+}
+
+function tStudentDetail(x){
+  const D = T.data;
+  let h = '';
+  ['1','2'].forEach(k=>{
+    const a = x.s[k]; const S = EXAM_DATA.sessions[k]; const key = D.answer_keys[k]||'';
+    h += `<div style="font-weight:800;margin:6px 0">${S.name}</div>`;
+    if(!a){ h += `<div class="mini">미응시</div>`; return; }
+    if(a.status!=='submitted'){ h += `<div class="mini">응시 중 · 시작 ${fmtDate(a.started_at)}</div>`; return; }
+    const ans = a.answers||'';
+    const wrong = [];
+    for(let i=0;i<key.length;i++) if(ans[i]!==key[i]) wrong.push(i+1);
+    const blank = [...ans].filter(c=>c==='0').length;
+    h += `<div class="mini">제출 ${fmtDate(a.submitted_at)} · 소요 ${durText(a)} · 제출 ${a.attempts}회 · 무응답 ${blank}문항 · 오답 ${wrong.length}문항</div>`;
+    h += wrong.map(no=>{
+      const q = S.questions[no-1]; const mine = +ans[no-1]; const k2 = +key[no-1];
+      const sub = S.subjects.find(s=>no>=s.from&&no<=s.to);
+      return `<div class="wrong-item"><div class="wq">[${sub?sub.name:''}] ${no}. ${esc(q?q.q:'')}</div>
+        <div class="wmeta">학생 답: <b>${mine?CIRC[mine-1]+' '+esc(q.options[mine-1]):'무응답'}</b> · 정답: <b><u>${CIRC[k2-1]} ${esc(q.options[k2-1])}</u></b></div></div>`;
+    }).join('');
+  });
+  h += `<div style="margin-top:10px;text-align:right"><button class="rec-btn del" onclick="teacherDelete(${JSON.stringify(x.no)})">이 학생 기록 삭제</button></div>`;
+  return h;
+}
+
+function renderTItems(){
+  const D = T.data; const k = T.itemSess; const S = EXAM_DATA.sessions[k]; const key = D.answer_keys[k]||'';
+  const subs = (D.attempts||[]).filter(a=>a.session===k && a.status==='submitted');
+  let rows = S.questions.map(q=>{
+    const i = q.no-1; const cnt = [0,0,0,0,0,0];
+    subs.forEach(a=>{ cnt[+(a.answers||'')[i]||0]++; });
+    const right = cnt[+key[i]];
+    return {no:q.no, q, cnt, key:+key[i], rate: subs.length ? Math.round(right/subs.length*1000)/10 : null,
+            sub: S.subjects.find(s=>q.no>=s.from&&q.no<=s.to)};
+  });
+  if(T.itemSort==='rate') rows.sort((a,b)=>(a.rate??101)-(b.rate??101) || a.no-b.no);
+  let h = `<div class="rec-card"><h4>🔎 문항 분석 <small>제출 ${subs.length}명 기준 · 정답 선택지는 <u>밑줄</u>과 ★로 표시</small>
+      <small style="margin-left:auto;display:flex;gap:6px">
+        <select class="rec-sel" style="padding:4px 6px;font-size:12.5px" onchange="T.itemSess=this.value;renderTeacher()">
+          <option value="1"${k==='1'?' selected':''}>1교시</option><option value="2"${k==='2'?' selected':''}>2교시</option></select>
+        <select class="rec-sel" style="padding:4px 6px;font-size:12.5px" onchange="T.itemSort=this.value;renderTeacher()">
+          <option value="no"${T.itemSort==='no'?' selected':''}>문항 번호순</option><option value="rate"${T.itemSort==='rate'?' selected':''}>정답률 낮은 순</option></select>
+      </small></h4>`;
+  if(!subs.length){ return h + `<div class="rec-empty">아직 ${S.name} 제출자가 없습니다.</div></div>`; }
+  h += `<div style="overflow-x:auto"><table class="rec-tb"><tr><th>번호</th><th>과목</th><th class="l">문항</th><th>정답</th><th>정답률</th>
+        ${CIRC.map(c=>`<th>${c}</th>`).join('')}<th>무응답</th></tr>`;
+  rows.forEach(r=>{
+    h += `<tr><td>${r.no}</td><td>${r.sub?r.sub.name:''}</td><td class="l" style="max-width:340px">${esc(r.q.q).slice(0,70)}${r.q.q.length>70?'…':''}</td>
+      <td><b>${CIRC[r.key-1]}</b></td>
+      <td><b>${r.rate}%</b>${r.rate<40?'<br><span class="t-bad">⚠ 낮음</span>':''}</td>
+      ${[1,2,3,4,5].map(v=>v===r.key?`<td><b><u>★${r.cnt[v]}</u></b></td>`:`<td>${r.cnt[v]}</td>`).join('')}
+      <td>${r.cnt[0]}</td></tr>`;
+  });
+  return h + `</table></div></div>`;
+}
+
+function renderTKey(){
+  const D = T.data;
+  let h = '';
+  ['1','2'].forEach(k=>{
+    const S = EXAM_DATA.sessions[k]; const key = D.answer_keys[k]||'';
+    h += `<div class="rec-card"><h4>🔑 ${S.name} 정답표 <small>${key.length}문항</small></h4><div class="t-keygrid">`;
+    for(let i=0;i<key.length;i++) h += `<div><span>${i+1}</span><b>${CIRC[+key[i]-1]}</b></div>`;
+    h += `</div></div>`;
+  });
+  return h;
+}
+
+async function teacherDelete(no){
+  const msg = no ? `학번 ${no} 학생의 응시 기록(1·2교시)을 삭제할까요? 되돌릴 수 없습니다.`
+                 : '모든 학생의 응시 기록을 삭제할까요? 되돌릴 수 없습니다.\n(시범 응시를 정리할 때 사용하세요)';
+  if(!confirm(msg)) return;
+  if(!no && !confirm('한 번 더 확인합니다. 전체 기록을 정말 삭제하시겠습니까?')) return;
+  try{
+    await api('gexam_teacher_delete', {p_exam:EXAM_ID, p_pw:T.pw, p_no:no});
+    T.open = null;
+    await teacherRefresh();
+  }catch(e){ alert('삭제하지 못했습니다: '+e.message); }
+}
+
+function exportTeacherCSV(){
+  const st = tStudents().sort((a,b)=>a.no.localeCompare(b.no));
+  if(!st.length){ alert('내보낼 결과가 없습니다.'); return; }
+  const subjNames = st[0].subj.map(s=>s.name);
+  const rows = [['학번','성명','1교시 점수','2교시 점수',...subjNames,'총점','판정','과락 과목','1교시 제출시각','2교시 제출시각','1교시 응답','2교시 응답']];
+  st.forEach(x=>{
+    const a1=x.s['1'], a2=x.s['2'];
+    rows.push([x.no, x.name,
+      x.done1?a1.correct:(a1?'응시 중':''), x.done2?a2.correct:(a2?'응시 중':''),
+      ...x.subj.map(s=>s.correct==null?'':s.correct),
+      x.total??'', x.pass==null?'':(x.pass?'합격':'불합격'), x.gwarak.join(' '),
+      x.done1?fmtDate(a1.submitted_at):'', x.done2?fmtDate(a2.submitted_at):'',
+      x.done1?"'"+a1.answers:'', x.done2?"'"+a2.answers:'']);
+  });
+  const csv = '﻿' + rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  downloadBlob(csv, `CUP_졸업고사_결과_${stamp()}.csv`, 'text/csv;charset=utf-8');
+}
+
+initIntro();
+</script>
+</body>
+</html>
