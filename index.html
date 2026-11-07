@@ -572,7 +572,8 @@ async function startExam(){
   try{
     await api('gexam_start', {p_exam:EXAM_ID, p_no:num, p_name:name, p_session:sessSel}, 12000);
   }catch(e){
-    alert('시험 서버에 연결할 수 없습니다.\n인터넷 연결을 확인한 뒤 다시 로그인해 주세요.');
+    if(/exam closed/.test(e.message||'')) alert('시험이 종료되었습니다.\n더 이상 응시할 수 없습니다.');
+    else alert('시험 서버에 연결할 수 없습니다.\n인터넷 연결을 확인한 뒤 다시 로그인해 주세요.');
     return;
   }finally{ loginBusy = false; btn.textContent = oldTxt; }
   state.user = {num, name};
